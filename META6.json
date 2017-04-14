@@ -1,9 +1,9 @@
 {
     "perl" : "6.c",
     "name" : "MinG",
-    "version" : "0.1.0",
+    "version" : "0.1.2",
     "description" : "A small module for working with Stabler's Minimalist Grammars in Perl6.",
-    "author" : "Ian G. Tayler",
+    "authors" : "Ian G. Tayler",
     "provides" : {
         "MinG" : "lib/MinG.pm6"
     },

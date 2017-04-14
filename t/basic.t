@@ -1,4 +1,6 @@
 use Test;
+use lib 'lib';
+
 use MinG;
 
 plan 5;
@@ -15,7 +17,8 @@ ok "+V" eq feature_from_str("+V").to_str;
 ###############
 # SECOND TEST #
 ###############
-ok say MinG::Grammar.new(lex => ()).litem_tree.qtree();
+say MinG::Grammar.new(lex => ()).litem_tree.qtree();
+ok "ROOT " eq MinG::Grammar.new(lex => ()).litem_tree.qtree();
 
 ##############
 # THIRD TEST #
@@ -23,7 +26,9 @@ ok say MinG::Grammar.new(lex => ()).litem_tree.qtree();
 my $fit = MinG::LItem.new(phon => "abc", sem => "", features => (fs("=A")));
 
 my $g = MinG::Grammar.new(lex => ($fit));
-ok say $g.litem_tree.qtree();
+my $q = $g.litem_tree.qtree();
+say $q;
+ok "[.ROOT  [.=A abc ] ] " eq $q;
 
 ###############
 # FOURTH TEST #
@@ -34,8 +39,9 @@ my $tit = MinG::LItem.new(phon => "abc", sem => "", features => (fs("+A")));
 
 $g = MinG::Grammar.new(lex => ($fit, $sit, $tit));
 my $t = $g.litem_tree;
-my $q = $t.qtree;
-ok say $q;
+$q = $t.qtree;
+say $q;
+ok "[.ROOT  [.=A abc ] [.+A jas abc ] ] " eq $q;
 
 ##############
 # FIFTH TEST #
@@ -45,6 +51,8 @@ $sit = MinG::LItem.new(phon => "gogo", sem => "", features => (fs("+A"), fs("=B"
 $tit = MinG::LItem.new(phon => "gogo", sem => "", features => (fs("+A"), fs("=B"), fs("-C")));
 
 $g = MinG::Grammar.new(lex => ($fit, $sit, $tit));
-ok say $g.litem_tree.qtree();
+$q = $g.litem_tree.qtree();
+say $q;
+ok "[.ROOT  [.=A abc ] [.C [.=B [.+A gogo ] ] ] [.-C [.=B [.+A gogo ] ] ] ] " eq $q;
 
 done-testing;
