@@ -1,7 +1,7 @@
-NAME
+MinG
 ====
 
-MinG -- A small module for working with Stabler's Minimalist Grammars in Perl6.
+A small module for working with Stabler's Minimalist Grammars in Perl6.
 
 class MinG::Feature
 -------------------
@@ -59,8 +59,12 @@ MAYDO
 
   * Create a world-model for a knowledgable AI using such semantics.
 
-AUTHOR Ian G Tayler, `<iangtayler@gmail.com> `
-==============================================
+AUTHOR
+======
 
-COPYRIGHT AND LICENSE Copyright © 2017, Ian G Tayler <iangtayler@gmail.com>. All rights reserved. This program is free software; you can redistribute it and/or modify it under the Artistic License 2.0.
-=========================================================================================================================================================================================================
+Ian G Tayler, `<iangtayler@gmail.com> `
+
+COPYRIGHT AND LICENSE
+=====================
+
+Copyright © 2017, Ian G Tayler <iangtayler@gmail.com>. All rights reserved. This program is free software; you can redistribute it and/or modify it under the Artistic License 2.0.

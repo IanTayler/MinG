@@ -1,32 +1,61 @@
 use strict;
+use MinTrees;
 =begin pod
 =head1 NAME
 
 MinG -- A small module for working with Stabler's Minimalist Grammars in Perl6.
 =end pod
 
+#|{
+    A basic class defining a Tree-node for internal use.
+    }
+class Node {
+    has $label;
+    has Node @children;
+}
 enum FWay <MERGE MOVE>;
 enum FPol <PLUS MINUS>;
 
 #|{
+    Takes an FWay and an FPol and returns the proper prefix for a string description of a feaute of that type.
+    }
+sub feature_prefix(FWay $way, FPol $pol) of Str {
+    if $way == MERGE {
+        return ""  if $pol == PLUS;
+        return "=" if $pol == MINUS;
+    } else {
+        return "+" if $pol == PLUS;
+        return "-" if $pol == MINUS;
+    }
+    die "Weird arguments for feature_pref.";
+}
+
+#|{
     A class that defines an MG-style-feature.
-
-    FWay $.way marks whether it is to be deleted through Merge or through Move.
-
-    FPol $.pol marks the polarity of the feature (selector/licensor or selectee/licensee).
-
-    Str $.type is the category of the feature (traditionally D, N, V, P, etc).
     }
 class MinG::Feature {
+    # FWay $.way marks whether it is to be deleted through Merge or through Move.
+    #
+    # FPol $.pol marks the polarity of the feature (selector/licensor or selectee/licensee).
+    #
+    # Str $.type is the category of the feature (traditionally D, N, V, P, etc).
+
     has FWay $.way;
     has FPol $.pol;
     has Str $.type;
+
+    #|{
+        Returns a string representation of the feature.
+        }
+    method to_str {
+        return feature_prefix($!way, $!pol) ~ $!type;
+    }
 }
 
 #|{
     Takes a string description of a feature (e.g. "=D") and returns a MinG::Feature.
-}
-sub feature_from_str (Str $inp) of MinG::Feature {
+    }
+sub feature_from_str (Str $inp) of MinG::Feature is export {
     if $inp ~~ /^ <[= + \-]> \w+ / {
         my $fchar = ~$/.substr(0, 1);
         given $fchar {
@@ -73,6 +102,7 @@ class MinG::Grammar {
 =item Make a parser for the MGs described.
 =item Automatically generate LaTeX/qtree code for derivation trees.
 =item Allow some useful expansions of MGs.
+=item Make the parser more efficient by adding probabilistic rule-following.
 
 =head1 MAYDO
 =item1  Create a probabilistic trainer.
@@ -83,8 +113,10 @@ class MinG::Grammar {
 =item1 Create a world-model for a knowledgable AI using such semantics.
 
 =head1 AUTHOR
+
 Ian G Tayler, C<< <iangtayler@gmail.com> >>
 =head1 COPYRIGHT AND LICENSE
+
 Copyright © 2017, Ian G Tayler <iangtayler@gmail.com>. All rights reserved.
 This program is free software; you can redistribute it and/or modify
 it under the Artistic License 2.0.
