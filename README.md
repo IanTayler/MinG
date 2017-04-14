@@ -1,32 +1,7 @@
-MinG
+NAME
 ====
 
-A small module for working with Stabler's Minimalist Grammars in Perl6.
-
-class MinG::Feature
--------------------
-
-A class that defines an MG-style-feature. FWay $.way marks whether it is to be deleted through Merge or through Move. FPol $.pol marks the polarity of the feature (selector/licensor or selectee/licensee). Str $.type is the category of the feature (traditionally D, N, V, P, etc).
-
-### sub feature_from_str
-
-```
-sub feature_from_str(
-    Str $inp
-) returns MinG::Feature
-```
-
-Takes a string description of a feature (e.g. "=D") and returns a MinG::Feature.
-
-class MinG::LItem
------------------
-
-A class that defines an MG-style Lexical Item as an array of features plus some phonetic and semantic content described currently as strings.
-
-class MinG::Grammar
--------------------
-
-A class that defines a Grammar as an array of lexical items.
+MinG -- A small module for working with Stabler's Minimalist Grammars in Perl6.
 
 CURRENTLY
 =========
@@ -35,16 +10,18 @@ CURRENTLY
 
   * Has a subroutine (feature_from_str) that takes a string description of a feature (e.g. "=D") and returns a MinG::Feature.
 
+  * Has lexical trees for Stabler's (2013) parsing method.
+
+  * Automatically generates LaTeX/qtree code for trees.
+
 TODO
 ====
 
-  * Create lexical trees for Stabler's (2013) parsing method.
-
   * Make a parser for the MGs described.
 
-  * Automatically generate LaTeX/qtree code for derivation trees.
-
   * Allow some useful expansions of MGs.
+
+  * Make the parser more efficient by adding probabilistic rule-following.
 
 MAYDO
 =====
