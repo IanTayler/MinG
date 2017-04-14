@@ -2,6 +2,7 @@ use Test;
 use lib 'lib';
 
 use MinG;
+use MinG::S13;
 
 plan 5;
 

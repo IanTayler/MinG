@@ -1,7 +1,38 @@
 NAME
 ====
 
-MinG -- A small module for working with Stabler's Minimalist Grammars in Perl6.
+MinG
+
+A small module for working with Stabler's Minimalist Grammars in Perl6.
+
+STRUCTURE
+=========
+
+As of now there are two (sub)modules: MinG and MinG::S13.
+
+In MinG, you'll find the necessary classes and subroutines for creating descriptions of Minimalist Grammars. It's not of much use by itself unless you're planning to implement your own parser/etc. and want to save yourself the time of having to define classes and useful functions.
+
+In MinG::S13, you'll find Stabler's (2013) "Two models of minimalist, incremental syntactic analysis" parser. Currently, this parser analyses all possibilities, while Stabler's parser discards low-probability derivations.
+
+More documentation can be found in HTML files inside the doc/ directory.
+
+INSTALLATION
+============
+
+If you have perl6 and panda or zef, the following should suffice:
+
+        git clone https://github.com/IanTayler/MinG.git
+        cd MinG
+        panda install .
+
+If you don't, the easiest is probably to install rakudobrew <https://github.com/tadzik/rakudobrew> and then run:
+
+        rakudobrew build moar
+        rakudobrew build panda
+
+and you should be ready to clone and install this repository.
+
+The module is currently ready for distribution, so I might add it to the Perl6 environment so that you can install it with "panda install MinG".
 
 CURRENTLY
 =========
@@ -10,9 +41,9 @@ CURRENTLY
 
   * Has a subroutine (feature_from_str) that takes a string description of a feature (e.g. "=D") and returns a MinG::Feature.
 
-  * Has lexical trees for Stabler's (2013) parsing method.
+  * Has lexical trees for Stabler's (2013) parsing method (MinG::Grammar.litem_tree).
 
-  * Automatically generates LaTeX/qtree code for trees.
+  * Automatically generates LaTeX/qtree code for trees. (Node.qtree inside MinG)
 
 TODO
 ====

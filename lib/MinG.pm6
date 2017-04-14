@@ -2,10 +2,14 @@ use strict;
 =begin pod
 =head1 NAME
 
-MinG -- A small module for working with Stabler's Minimalist Grammars in Perl6.
+MinG -- A small module for describing MGs in Perl6.
 =end pod
 
 class MinG::Feature { ... }
+
+=begin pod
+=head1 INTERNAL CLASSES AND FUNCTIONS
+=end pod
 
 #|{
     A basic class defining a Tree-node for internal use.
@@ -100,6 +104,10 @@ sub feature_prefix(FWay $way, FPol $pol) of Str {
     }
     die "Weird arguments for feature_prefix.";
 }
+
+=begin pod
+=head1 EXPORTED CLASSES AND FUNCTIONS
+=end pod
 
 #|{
     A class that defines an MG-style-feature.
@@ -205,35 +213,3 @@ class MinG::Grammar {
         return $root;
     }
 }
-
-=begin pod
-
-=head1 CURRENTLY
-=item Has classes that correctly describe MGs (MinG::Grammar), MG-LIs (MinG::LItem) and MG-style-features (MinG::Feature).
-=item Has a subroutine (feature_from_str) that takes a string description of a feature (e.g. "=D") and returns a MinG::Feature.
-=item Has lexical trees for Stabler's (2013) parsing method.
-=item Automatically generates LaTeX/qtree code for trees.
-
-=head1 TODO
-=item Make a parser for the MGs described.
-=item Allow some useful expansions of MGs.
-=item Make the parser more efficient by adding probabilistic rule-following.
-
-=head1 MAYDO
-=item1  Create a probabilistic trainer.
-=item2      Use annotated corpora to build lexical entries.
-=item2      Use a small subset of predefined lexical entries and a non-annotated corpus to "guess" the feature specification of unknown lexical items.
-
-=item1 Create a Montague-style semantics for MG trees.
-=item1 Create a world-model for a knowledgable AI using such semantics.
-
-=head1 AUTHOR
-
-Ian G Tayler, C<< <iangtayler@gmail.com> >>
-=head1 COPYRIGHT AND LICENSE
-
-Copyright © 2017, Ian G Tayler <iangtayler@gmail.com>. All rights reserved.
-This program is free software; you can redistribute it and/or modify
-it under the Artistic License 2.0.
-
-=end pod

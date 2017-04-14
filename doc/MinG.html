@@ -33,12 +33,9 @@
 <table id="TOC">
 <caption><h2 id="TOC_Title">Table of Contents</h2></caption>
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
-                  <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#CURRENTLY">CURRENTLY</a></td></tr>
-     <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#TODO">TODO</a></td></tr>
-    <tr class="toc-level-1"><td class="toc-number">4</td><td class="toc-text"><a href="#MAYDO">MAYDO</a></td></tr>
-      <tr class="toc-level-1"><td class="toc-number">5</td><td class="toc-text"><a href="#AUTHOR">AUTHOR</a></td></tr>
-    <tr class="toc-level-1"><td class="toc-number">6</td><td class="toc-text"><a href="#COPYRIGHT_AND_LICENSE">COPYRIGHT AND LICENSE</a></td></tr>
- 
+  <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS">INTERNAL CLASSES AND FUNCTIONS</a></td></tr>
+          <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
+       
 </table>
 </nav>
 
@@ -46,7 +43,8 @@
 
 ">
 <h1 id="NAME"><a class="u" href="#___top" title="go to top of document">NAME</a></h1>
-<p>MinG -- A small module for working with Stabler&#39;s Minimalist Grammars in Perl6.</p>
+<p>MinG -- A small module for describing MGs in Perl6.</p>
+<h1 id="INTERNAL_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">INTERNAL CLASSES AND FUNCTIONS</a></h1>
 <h1>Node: A basic class defining a Tree-node for internal use.</h1><article>
 <code class="pod-code-inline">add_child:(Node $: Node $child, *%_ --&gt; Int)</code>:
 Method for adding a child at the end of the children array. Returns the index of the new child.
@@ -75,6 +73,7 @@ Override Node&#39;s str_label() method. We use MinG::Feature&#39;s to_str() meth
 <code class="pod-code-inline">feature_prefix:(FWay $way, FPol $pol --&gt; Str)</code>:
 Takes an FWay and an FPol and returns the proper prefix for a string description of a feature of that type.
 </article>
+<h1 id="EXPORTED_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">EXPORTED CLASSES AND FUNCTIONS</a></h1>
 <h1>MinG::Feature: A class that defines an MG-style-feature.</h1><article>
 <code class="pod-code-inline">to_str:(MinG::Feature $: *%_)</code>:
 Method that returns a string representation of the feature.
@@ -91,41 +90,6 @@ Takes a string description of a feature (e.g. &quot;=D&quot;) and returns a MinG
 <code class="pod-code-inline">litem_tree:(MinG::Grammar $: *%_ --&gt; Node)</code>:
 Method for getting a lexical tree like the one used in Stabler&#39;s (2013) parser.
 </article>
-<h1 id="CURRENTLY"><a class="u" href="#___top" title="go to top of document">CURRENTLY</a></h1>
-<ul><li><p>Has classes that correctly describe MGs (MinG::Grammar), MG-LIs (MinG::LItem) and MG-style-features (MinG::Feature).</p>
-</li>
-<li><p>Has a subroutine (feature_from_str) that takes a string description of a feature (e.g. &quot;=D&quot;) and returns a MinG::Feature.</p>
-</li>
-<li><p>Has lexical trees for Stabler&#39;s (2013) parsing method.</p>
-</li>
-<li><p>Automatically generates LaTeX/qtree code for trees.</p>
-</li>
-</ul>
-<h1 id="TODO"><a class="u" href="#___top" title="go to top of document">TODO</a></h1>
-<ul><li><p>Make a parser for the MGs described.</p>
-</li>
-<li><p>Allow some useful expansions of MGs.</p>
-</li>
-<li><p>Make the parser more efficient by adding probabilistic rule-following.</p>
-</li>
-</ul>
-<h1 id="MAYDO"><a class="u" href="#___top" title="go to top of document">MAYDO</a></h1>
-<ul><li><p>Create a probabilistic trainer.</p>
-</li>
-<ul><li><p>Use annotated corpora to build lexical entries.</p>
-</li>
-<li><p>Use a small subset of predefined lexical entries and a non-annotated corpus to &quot;guess&quot; the feature specification of unknown lexical items.</p>
-</li>
-</ul>
-<li><p>Create a Montague-style semantics for MG trees.</p>
-</li>
-<li><p>Create a world-model for a knowledgable AI using such semantics.</p>
-</li>
-</ul>
-<h1 id="AUTHOR"><a class="u" href="#___top" title="go to top of document">AUTHOR</a></h1>
-<p>Ian G Tayler, <code>&lt;iangtayler@gmail.com&gt; </code></p>
-<h1 id="COPYRIGHT_AND_LICENSE"><a class="u" href="#___top" title="go to top of document">COPYRIGHT AND LICENSE</a></h1>
-<p>Copyright © 2017, Ian G Tayler &lt;iangtayler@gmail.com&gt;. All rights reserved. This program is free software; you can redistribute it and/or modify it under the Artistic License 2.0.</p>
 
 </div>
 
