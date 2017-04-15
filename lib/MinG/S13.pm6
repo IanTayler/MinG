@@ -52,7 +52,7 @@ class Priority {
 }
 
 #|{
-    Function used to compare two priorities. Uses Priority.bigger_than method internally.
+    Function used to compare two priorities. Uses Priority.bigger_than method internally. There aren't many reasons to use it, but if you can find one, go ahead.
     }
 sub bigger_pty (Priority $a, Priority $b) {
     return $a.bigger_than($b);
@@ -71,16 +71,76 @@ class Mover {
     }
 class QueueItem {
     has Priority $.priority;
-    has Array[Mover] $.movers;
+    has Mover @.movers;
     has Node $.node;
 
+    #|{
+        This method is a wrapper around Priority.bigger_than so that it can be called more easily from a Queue object.
+        }
     method bigger_than(QueueItem $other) {
         return self.priority.bigger_than($other.priority);
     }
 }
 
+#|{
+    The Queue of category predictions.
+    }
 class Queue {
     has QueueItem @.items;
+
+    #|{
+        With this method, we find out the index of the highest-priority item. Linear time.
+        }
+    method ind_max() of Int {
+        if @.items.elems == 0 {
+            # It may or may not be better to die here. I'm letting it be for now.
+            return Nil;
+        }
+        my $highest = @.items[0];
+        my $index = 0;
+        loop (my $i = 1; $i < @.items.elems; i++) {
+            next if @.items[$i] eqv (QueueItem);
+            if @.items[$i].bigger_than($highest) {
+                $highest = @.items[$i];
+                $index = $i;
+            }
+        }
+        return $index;
+    }
+
+    #|{
+        Method that gets a reference to the highest-priority item. Linear time.
+        }
+    method max() {
+        return @.items[self.ind_max];
+    }
+
+    #|{
+        Method that deletes the highest-priority item and returns it. Linear time.
+        }
+    method pop() {
+        return @.items[self.ind_max]:delete;
+    }
+
+    #|{
+        Method that adds an element to the Queue. This runs in constant time.
+        }
+    method push(QueueItem $new) {
+        push @.items, $new;
+    }
+}
+
+#|{
+    Class that represents derivation trees. As of now, they're just Nodes.
+    }
+class DerivTree is Node {};
+
+#|{
+    Class that represents one derivation.
+    }
+class Derivation {
+    has Str @input;
+    has Queue $q;
 }
 
 #####################################################
@@ -89,3 +149,32 @@ class Queue {
 =begin pod
 =head1 EXPORTED CLASSES AND FUNCTIONS
 =end pod
+
+#|{
+    Class that implements the parser per se. This is where all the magic happens.
+    }
+class MinG::S13 {
+    has Derivation @!devq;
+
+    #|{
+        Method that runs one iteration of the parsing loop, running one step of each derivation in parallel.
+        }
+    method parallel_run() {
+        my @promises;
+        for @!devq -> $dev {
+            push @promises, Promise.start({ $dev.exps() });
+        }
+        my @newdevq;
+        for @promises -> $prom {
+            append @newdevq, $prom.result;
+        }
+        @!devq = @newdevq;
+    }
+
+    #|{
+        Method that runs one iteration of the parsing loop, running one step of one derivation only. No parallel computation.
+        }
+    method procedural_run() {
+        append @!devq, @!devq.pop().exps();
+    }
+}

@@ -34,8 +34,8 @@
 <caption><h2 id="TOC_Title">Table of Contents</h2></caption>
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
   <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS]">INTERNAL CLASSES AND FUNCTIONS]</a></td></tr>
-       <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
-
+               <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
+   
 </table>
 </nav>
 
@@ -55,9 +55,37 @@ Returns the length of the priority. In this implementation, priorities are seque
 </article>
 <article>
 <code class="pod-code-inline">bigger_pty:(Priority $a, Priority $b)</code>:
-Function used to compare two priorities. Uses Priority.smaller_than method internally.
+Function used to compare two priorities. Uses Priority.bigger_than method internally. There aren&#39;t many reasons to use it, but if you can find one, go ahead.
 </article>
-<h1>Mover: Class for our movers: they represent the nodes we selected when we ran into a [MOVE, PLUS] feature and encountered a [MOVE, MINUS] feature as one of ROOT&#39;s children.</h1><h1>QueueItem: Objets of this class are items in a Queue. The only Queue we need to implement is the one for category predictions, so this is to be interpreted as an item in THAT queue.</h1><h1 id="EXPORTED_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">EXPORTED CLASSES AND FUNCTIONS</a></h1>
+<h1>Mover: Class for our movers: they represent the nodes we selected when we ran into a [MOVE, PLUS] feature and encountered a [MOVE, MINUS] feature as one of ROOT&#39;s children.</h1><h1>QueueItem: Objets of this class are items in a Queue. The only Queue we need to implement is the one for category predictions, so this is to be interpreted as an item in THAT queue.</h1><article>
+<code class="pod-code-inline">bigger_than:(QueueItem $: QueueItem $other, *%_)</code>:
+This method is a wrapper around Priority.bigger_than so that it can be called more easily from a Queue object.
+</article>
+<h1>Queue: The Queue of category predictions.</h1><article>
+<code class="pod-code-inline">ind_max:(Queue $: *%_ --&gt; Int)</code>:
+With this method, we find out the index of the highest-priority item. Linear time.
+</article>
+<article>
+<code class="pod-code-inline">max:(Queue $: *%_)</code>:
+Method that gets a reference to the highest-priority item. Linear time.
+</article>
+<article>
+<code class="pod-code-inline">pop:(Queue $: *%_)</code>:
+Method that deletes the highest-priority item and returns it. Linear time.
+</article>
+<article>
+<code class="pod-code-inline">push:(Queue $: QueueItem $new, *%_)</code>:
+Method that adds an element to the Queue. This runs in constant time.
+</article>
+<h1>DerivTree: Class that represents derivation trees. As of now, they&#39;re just Nodes.</h1><h1>Derivation: Class that represents one derivation.</h1><h1 id="EXPORTED_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">EXPORTED CLASSES AND FUNCTIONS</a></h1>
+<h1>MinG::S13: Class that implements the parser per se. This is where all the magic happens.</h1><article>
+<code class="pod-code-inline">parallel_run:(MinG::S13 $: *%_)</code>:
+Method that runs one iteration of the parsing loop, running one step of each derivation in parallel.
+</article>
+<article>
+<code class="pod-code-inline">procedural_run:(MinG::S13 $: *%_)</code>:
+Method that runs one iteration of the parsing loop, running one step of one derivation only. No parallel computation.
+</article>
 
 </div>
 

@@ -236,6 +236,7 @@ class MinG::LItem {
     }
 class MinG::Grammar {
     has MinG::LItem @.lex;
+    has MinG::Feature $.start_cat;
 
     #|{
         Method for getting a lexical tree like the one used in Stabler's (2013) parser.
