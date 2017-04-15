@@ -33,7 +33,9 @@
 <table id="TOC">
 <caption><h2 id="TOC_Title">Table of Contents</h2></caption>
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
- 
+  <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS]">INTERNAL CLASSES AND FUNCTIONS]</a></td></tr>
+       <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
+
 </table>
 </nav>
 
@@ -42,6 +44,20 @@
 ">
 <h1 id="NAME"><a class="u" href="#___top" title="go to top of document">NAME</a></h1>
 <p>MinG::S13 -- Stabler&#39;s (2013) parser.</p>
+<h1 id="INTERNAL_CLASSES_AND_FUNCTIONS]"><a class="u" href="#___top" title="go to top of document">INTERNAL CLASSES AND FUNCTIONS]</a></h1>
+<h1>Priority: Objects in this class describe positions in a Queue.</h1><article>
+<code class="pod-code-inline">bigger_than:(Priority $: Priority $other, *%_ --&gt; Bool)</code>:
+A method that compares this object&#39;s priority with another Priority object&#39;s priority and returns true if this one&#39;s is smaller.
+</article>
+<article>
+<code class="pod-code-inline">length:(Priority $: *%_ --&gt; Int)</code>:
+Returns the length of the priority. In this implementation, priorities are sequences of numbers, and they are ordered lexicographically so that longer sequences have less priority than shorter ones.
+</article>
+<article>
+<code class="pod-code-inline">bigger_pty:(Priority $a, Priority $b)</code>:
+Function used to compare two priorities. Uses Priority.smaller_than method internally.
+</article>
+<h1>Mover: Class for our movers: they represent the nodes we selected when we ran into a [MOVE, PLUS] feature and encountered a [MOVE, MINUS] feature as one of ROOT&#39;s children.</h1><h1>QueueItem: Objets of this class are items in a Queue. The only Queue we need to implement is the one for category predictions, so this is to be interpreted as an item in THAT queue.</h1><h1 id="EXPORTED_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">EXPORTED CLASSES AND FUNCTIONS</a></h1>
 
 </div>
 

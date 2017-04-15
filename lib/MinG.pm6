@@ -7,6 +7,9 @@ MinG -- A small module for describing MGs in Perl6.
 
 class MinG::Feature { ... }
 
+#################################################
+#   INTERNAL THINGS     #   MAY CHANGE RAPIDLY  #
+#################################################
 =begin pod
 =head1 INTERNAL CLASSES AND FUNCTIONS
 =end pod
@@ -23,7 +26,7 @@ class Node {
         }
     method add_child(Node $child) of Int {
         push @!children, $child;
-        return @!children - 1;
+        return @!children.end;
     }
 
     #|{
@@ -84,6 +87,35 @@ class Node {
         self.make_tex($name);
         shell "pdflatex \.\/$name";
     }
+
+    #|{
+        This method checks whether this node is a feature-node. (We called them LexNodes which, to be fair, makes no sense.)
+        }
+    method feat_node() of Bool {
+        return False;
+    }
+
+    #|{ Get this Node's feature-node-children.}
+    method feat_children() of Array[Node] {
+        my @retv = ();
+        for @.children -> $this {
+            if $this.feat_node {
+                @retv.push($this);
+            }
+        }
+        return @retv;
+    }
+
+    #|{ Get this Node's non-feature-node-children.}
+    method non_feat_children() of Array[Node] {
+        my @retv = ();
+        for @.children -> $this {
+            unless $this.feat_node {
+                @retv.push($this);
+            }
+        }
+        return @retv;
+    }
 }
 
 #|{
@@ -92,7 +124,7 @@ class Node {
 multi infix:<eqv>(Node $l, Node $r) { $l.label eqv $r.label };
 
 #|{
-    A class defining the trees we'll use for representing the lexicon.
+    A class defining the trees we'll use for representing the lexicon. In particular, LexNodes are going to be representing the nodes that hold features.
     }
 class LexNode is Node {
     has Bool $.last;
@@ -103,6 +135,13 @@ class LexNode is Node {
         }
     method str_label() of Str {
         return $.label.to_str;
+    }
+
+    #|{
+        Override Node's feat_node() because we ARE a feature node.
+        }
+    method feat_node() of Bool {
+        return True;
     }
 }
 
@@ -123,6 +162,9 @@ sub feature_prefix(FWay $way, FPol $pol) of Str {
     die "Weird arguments for feature_prefix.";
 }
 
+#####################################################
+#   EXTERNAL THINGS     #   SHOULD STAY CONSTANT    #
+#####################################################
 =begin pod
 =head1 EXPORTED CLASSES AND FUNCTIONS
 =end pod

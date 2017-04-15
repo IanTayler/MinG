@@ -1,7 +1,5 @@
-NAME
-====
-
 MinG
+====
 
 A small module for working with Stabler's Minimalist Grammars in Perl6.
 

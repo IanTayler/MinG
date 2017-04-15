@@ -1,5 +1,5 @@
 =begin pod
-=NAME MinG
+=head1 MinG
 
 A small module for working with Stabler's Minimalist Grammars in Perl6.
 =head1 STRUCTURE

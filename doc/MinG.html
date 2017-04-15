@@ -34,7 +34,7 @@
 <caption><h2 id="TOC_Title">Table of Contents</h2></caption>
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
   <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS">INTERNAL CLASSES AND FUNCTIONS</a></td></tr>
-            <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
+                <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
        
 </table>
 </nav>
@@ -70,12 +70,28 @@ Make a LaTeX file named $name which includes this Node&#39;s tree using qtree.
 Make a LaTeX file named $name which includes this Node&#39;s tree using qtree, and then compile it using pdflatex.
 </article>
 <article>
+<code class="pod-code-inline">feat_node:(Node $: *%_ --&gt; Bool)</code>:
+This method checks whether this node is a feature-node. (We called them LexNodes which, to be fair, makes no sense.)
+</article>
+<article>
+<code class="pod-code-inline">feat_children:(Node $: *%_ --&gt; Array[Node])</code>:
+Get this Node&#39;s feature-node-children.
+</article>
+<article>
+<code class="pod-code-inline">non_feat_children:(Node $: *%_ --&gt; Array[Node])</code>:
+Get this Node&#39;s non-feature-node-children.
+</article>
+<article>
 <code class="pod-code-inline">infix:&lt;eqv&gt;:(Node $l, Node $r)</code>:
 Define eqv between Nodes as an equivalence in labels.
 </article>
-<h1>LexNode: A class defining the trees we&#39;ll use for representing the lexicon.</h1><article>
+<h1>LexNode: A class defining the trees we&#39;ll use for representing the lexicon. In particular, LexNodes are going to be representing the nodes that hold features.</h1><article>
 <code class="pod-code-inline">str_label:(LexNode $: *%_ --&gt; Str)</code>:
 Override Node&#39;s str_label() method. We use MinG::Feature&#39;s to_str() method to get the representation.
+</article>
+<article>
+<code class="pod-code-inline">feat_node:(LexNode $: *%_ --&gt; Bool)</code>:
+Override Node&#39;s feat_node() because we ARE a feature node.
 </article>
 <article>
 <code class="pod-code-inline">feature_prefix:(FWay $way, FPol $pol --&gt; Str)</code>:
