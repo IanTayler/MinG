@@ -66,6 +66,24 @@ class Node {
         }
         return $retv;
     }
+
+    #|{
+        Make a LaTeX file named $name which includes this Node's tree using qtree.
+        }
+    method make_tex(Str $name) {
+        my $tree = self.qtree;
+        my $contents = slurp %?RESOURCES{"template.tex"};
+        $contents.=subst("#<HERE-TREE>", $tree);
+        spurt "\.\/$name", $contents;
+    }
+
+    #|{
+        Make a LaTeX file named $name which includes this Node's tree using qtree, and then compile it using pdflatex.
+        }
+    method compile_tex(Str $name) {
+        self.make_tex($name);
+        shell "pdflatex \.\/$name";
+    }
 }
 
 #|{

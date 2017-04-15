@@ -1,63 +1,9 @@
 \documentclass[a4paper, spanish]{article}
 
-\usepackage{tikz}
 \usepackage{qtree}
-\usepackage{fancyhdr}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish]{babel}
-\usepackage{lipsum}
-\usepackage{fixltx2e}
-\usepackage{graphicx}
-\usepackage{ragged2e}
-\usepackage{tree-dvips}
-\usepackage{amssymb}
-\usepackage{amsmath}
-\usepackage{amsthm}
-\usepackage{apacite}
-\usepackage{stmaryrd}
-\usepackage{enumitem}
-\usepackage{calc}
-
-\newcommand{\sub}{\textsubscript}
-\newcommand{\super}{\textsuperscript}
-
-\renewcommand\thesection{\alph{section}}
-
-\newtheoremstyle{pverdad}% name of the style to be used
-  {0pt}% measure of space to leave above the theorem. E.g.: 3pt
-  {1pt}% measure of space to leave below the theorem. E.g.: 3pt
-  {\itshape}% name of font to use in the body of the theorem
-  {0pt}% measure of space to indent
-  {\bfseries}% name of head font
-  {}% punctuation between head and body
-  { }% space after theorem head; " " = normal interword space
-  {\thmname{#1}\thmnote{#3}:}
-
-\theoremstyle{pverdad}
-\newtheorem*{pverdad}{}
-
-\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
-\let\endchangemargin=\endlist
-
-\let\bicond\leftrightarrow
-
-\let\lden\llbracket
-\let\rden\rrbracket
-
-\let\lam\lambda
-
-\let\lan\langle
-\let\ran\rangle
-
-\let\bf\textbf
-
-\def\til#1{\text{\emph{\'#1}}}
-
-\def\afterTree{\\\\}
-
-\def\verdad#1{\begin{changemargin}{0.7cm}{0.7cm}\begin{pverdad}[#1]}
-\def\endv{\end{pverdad}\end{changemargin}}
 
 \begin{document}
 	\Tree #<HERE-TREE>

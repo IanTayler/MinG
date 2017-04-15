@@ -34,7 +34,7 @@
 <caption><h2 id="TOC_Title">Table of Contents</h2></caption>
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
   <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS">INTERNAL CLASSES AND FUNCTIONS</a></td></tr>
-          <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
+            <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
        
 </table>
 </nav>
@@ -60,6 +60,14 @@ Method that returns the string representation of a Node label.
 <article>
 <code class="pod-code-inline">qtree:(Node $: *%_ --&gt; Str)</code>:
 Method that returns a LaTeX/qtree representation of the Node.
+</article>
+<article>
+<code class="pod-code-inline">make_tex:(Node $: Str $name, *%_)</code>:
+Make a LaTeX file named $name which includes this Node&#39;s tree using qtree.
+</article>
+<article>
+<code class="pod-code-inline">compile_tex:(Node $: Str $name, *%_)</code>:
+Make a LaTeX file named $name which includes this Node&#39;s tree using qtree, and then compile it using pdflatex.
 </article>
 <article>
 <code class="pod-code-inline">infix:&lt;eqv&gt;:(Node $l, Node $r)</code>:
