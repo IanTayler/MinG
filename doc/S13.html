@@ -86,36 +86,36 @@ Method that gets the amount of elements in the Queue. It&#39;s not reliable beca
 Method that returns whether this derivation still needs more steps.
 </article>
 <article>
-<code class="pod-code-inline">scan:(Derivation $: *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">scan:(Derivation $: QueueItem $pred, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
-<code class="pod-code-inline">merge1:(Derivation $: *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">merge1:(Derivation $: QueueItem $pred, Node @leaves, Node $selected, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
-<code class="pod-code-inline">merge2:(Derivation $: *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">merge2:(Derivation $: QueueItem $pred, Node @non_terms, Node $selected, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
-<code class="pod-code-inline">merge3:(Derivation $: *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">merge3:(Derivation $: QueueItem $pred, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
-<code class="pod-code-inline">merge4:(Derivation $: *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">merge4:(Derivation $: QueueItem $pred, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
-<code class="pod-code-inline">move1:(Derivation $: *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">move1:(Derivation $: QueueItem $pred, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
-<code class="pod-code-inline">move2:(Derivation $: *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">move2:(Derivation $: QueueItem $pred, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
 <code class="pod-code-inline">exps:(Derivation $: *%_ --&gt; Array[Derivation])</code>:
-Method that gets the expansions to be had in the next step.
+Method that gets the expansions to be had in the next step. Check the code&#39;s comments for more details.
 </article>
 <h1 id="EXPORTED_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">EXPORTED CLASSES AND FUNCTIONS</a></h1>
 <h1>MinG::S13::Parser: Class that implements the parser per se. This is not where the magic happens, but it is where most of the external API is defined.</h1><article>

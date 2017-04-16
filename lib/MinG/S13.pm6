@@ -14,6 +14,13 @@ MinG::S13 -- Stabler's (2013) parser.
 =head1 INTERNAL CLASSES AND FUNCTIONS]
 =end pod
 
+#############
+# CONSTANTS #
+#############
+constant $IS_SELECTOR  = -> Node $x { $x.feat_node and $x.label.way == MERGE and $x.label.pol == PLUS };
+constant $IS_FEAT_NODE = -> Node $x { $x.feat_node };
+constant $IS_NOT_FEAT  = -> Node $x { not ($x.feat_node) };
+
 #################################################################################
 # Implemented the 'current' lexical tree as a global variable.
 # This is the ugliest thing in the implementation. Should I at one point fix it?
@@ -185,42 +192,42 @@ class Derivation {
     }
 
     #|{ See Stabler (2013)}
-    method scan() of Derivation {
+    method scan(QueueItem $pred) of Derivation {
 
     }
 
     #|{ See Stabler (2013)}
-    method merge1() of Derivation {
+    method merge1(QueueItem $pred, Node @leaves, Node $selected) of Derivation {
 
     }
 
     #|{ See Stabler (2013)}
-    method merge2() of Derivation {
+    method merge2(QueueItem $pred, Node @non_terms, Node $selected) of Derivation {
 
     }
 
     #|{ See Stabler (2013)}
-    method merge3() of Derivation {
+    method merge3(QueueItem $pred) of Derivation {
 
     }
 
     #|{ See Stabler (2013)}
-    method merge4() of Derivation {
+    method merge4(QueueItem $pred) of Derivation {
 
     }
 
     #|{ See Stabler (2013)}
-    method move1() of Derivation {
+    method move1(QueueItem $pred) of Derivation {
 
     }
 
     #|{ See Stabler (2013)}
-    method move2() of Derivation {
+    method move2(QueueItem $pred) of Derivation {
 
     }
 
     #|{
-        Method that gets the expansions to be had in the next step.
+        Method that gets the expansions to be had in the next step. Check the code's comments for more details.
         }
     method exps() of Array[Derivation] {
         my $this_prediction = $.q.pop();
@@ -228,11 +235,40 @@ class Derivation {
 
         # SCAN CONSIDERED. NEEDS MERGE1-4 and MOVE1-2.
         if $this_prediction.node.has_child(@.input[0]) {
-            my $scanned = self.scan();
+            my $scanned = self.scan($this_prediction);
             append @retv, $scanned if $scanned;
         }
 
-        #
+        # Let's consider MERGE1 and MERGE2 first.
+        # This line can be a bit daunting, but it's not that hard actually.
+        # We grab this prediction's node and take the children of that node that
+        # have the property of being a selector (i.e. FWAY::MERGE and FPol::PLUS).
+        # If the list is empty, the condition evaluates to False. If it isn't,
+        # it evaluates to True, and we get those children in the array called
+        # @selector_ch.
+        if $this_prediction.node.children_with_property($IS_SELECTOR) -> @selector_ch {
+            # We iterate over every child that is a selector. Applying MERGE1
+            # and/or MERGE2 if the conditions are met.
+SEL_LOOP:   for @selector_ch -> $selec {
+                # The following code checks that there is a node immediately below
+                # ROOT that has the proper category.
+                my $selected;
+                my $selected_f = MinG::Feature.new(way => MERGE, pol => MINUS, type => $selec.label.type);
+                my $selected_ind = $lexical_tree.has_child($selected_f);
+                $selected = $lexical_tree.children[$selected_ind] if $selected_ind;
+
+                # Get all leaves and do MERGE1
+                if $selec.children_with_property($IS_NOT_FEAT) -> @leaves {
+                    my $merged = self.merge1($this_prediction, @leaves, $selected);
+                    append @retv, $merged if $merged;
+                }
+                # Get all non-leaves and do MERGE2
+                if $selec.children_with_property($IS_FEAT_NODE) -> @non_terms {
+                    my $merged = self.merge2($this_prediction, @non_terms, $selected);
+                    append @retv, $merged if $merged;
+                }
+            }
+        }
 
         return @retv;
     }
