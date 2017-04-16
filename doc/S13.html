@@ -34,8 +34,8 @@
 <caption><h2 id="TOC_Title">Table of Contents</h2></caption>
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
   <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS]">INTERNAL CLASSES AND FUNCTIONS]</a></td></tr>
-                         <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
-     
+                          <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
+      
 </table>
 </nav>
 
@@ -48,6 +48,10 @@
 <h1>Priority: Objects in this class describe positions in a Queue.</h1><article>
 <code class="pod-code-inline">bigger_than:(Priority $: Priority $other, *%_ --&gt; Bool)</code>:
 A method that compares this object&#39;s priority with another Priority object&#39;s priority and returns true if this one&#39;s is smaller.
+</article>
+<article>
+<code class="pod-code-inline">add_p:(Priority $: Int $n, *%_ --&gt; Priority)</code>:
+Method that appends a number at the end of the priority. It returns a new Priority instead of changing itself automatically. Less efficient, but more useful for our purposes.
 </article>
 <article>
 <code class="pod-code-inline">length:(Priority $: *%_ --&gt; Int)</code>:
@@ -86,15 +90,15 @@ Method that gets the amount of elements in the Queue. It&#39;s not reliable beca
 Method that returns whether this derivation still needs more steps.
 </article>
 <article>
-<code class="pod-code-inline">scan:(Derivation $: QueueItem $pred, *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">scan:(Derivation $: QueueItem $pred, Int $child_place, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
-<code class="pod-code-inline">merge1:(Derivation $: QueueItem $pred, Node @leaves, Node $selected, *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">merge1:(Derivation $: QueueItem $pred, Node @leaves, Node $selected, Node $selector, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
-<code class="pod-code-inline">merge2:(Derivation $: QueueItem $pred, Node @non_terms, Node $selected, *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">merge2:(Derivation $: QueueItem $pred, Node @non_terms, Node $selected, Node $selector, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
@@ -133,6 +137,10 @@ Method that runs the main parsing loop using parallel_run. Gets all possible der
 <article>
 <code class="pod-code-inline">procedural_parse:(MinG::S13::Parser $: *%_ --&gt; Bool)</code>:
 Method that runs the main parseing loop using procedural_run. Stops after it finds the first derivation.
+</article>
+<article>
+<code class="pod-code-inline">setup:(MinG::S13::Parser $: MinG::Grammar $g, Str $inp, *%_)</code>:
+Method that sets up a parser with a certain grammar and a certain input (taken as a string for convenience, converted to lower case and an array as needed) and creates the first derivation.
 </article>
 
 </div>

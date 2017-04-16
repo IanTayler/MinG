@@ -138,7 +138,6 @@ multi infix:<eqv>(Node $l, Node $r) { $l.label eqv $r.label };
     A class defining the trees we'll use for representing the lexicon. In particular, LexNodes are going to be representing the nodes that hold features.
     }
 class LexNode is Node {
-    has Bool $.last;
     #has MinG::Feature $.label;
 
     #|{

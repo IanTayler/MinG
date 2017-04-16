@@ -77,6 +77,15 @@ class Priority {
     }
 
     #|{
+        Method that appends a number at the end of the priority. It returns a new Priority instead of changing itself automatically. Less efficient, but more useful for our purposes.
+        }
+    method add_p(Int $n) of Priority {
+        my @new_pty = @.pty;
+        @new_pty.push($n);
+        return Priority.new(pty => @new_pty);
+    }
+
+    #|{
         Returns the length of the priority. In this implementation, priorities are sequences of numbers, and they are ordered lexicographically so that longer sequences have less priority than shorter ones.
         }
     method length() of Int {
@@ -131,7 +140,7 @@ class Queue {
         }
         my $highest = @.items[0];
         my $index = 0;
-        loop (my $i = 1; $i < @.items.elems; i++) {
+        loop (my uint16 $i = 1; $i < @.items.elems; $i++) {
             next if @.items[$i] eqv (QueueItem);
             if @.items[$i].bigger_than($highest) {
                 $highest = @.items[$i];
@@ -173,7 +182,18 @@ class Queue {
 #|{
     Class that represents derivation trees. As of now, they're just Nodes.
     }
-class DerivTree is Node {};
+class DerivTree is Node {
+    # This is all tentative. We don't really generate a derivation tree but a
+    # weird and useless derivation chain. Consider it a placeholder for future
+    # true derivations.
+    method add_to_end(Node $n) {
+        my $lastman = self;
+        while $lastman.children.elems > 0 {
+            $lastman = $lastman.children[0];
+        }
+        $lastman.children.push($n);
+    }
+};
 
 #|{
     Class that represents one derivation.
@@ -182,7 +202,7 @@ class Derivation {
     has Str @.input;
     has Queue $.q;
     # $structure holds the current derivation tree of the derivation.
-    has DerivTree $structure;
+    has DerivTree $.structure;
 
     #|{
         Method that returns whether this derivation still needs more steps.
@@ -192,18 +212,65 @@ class Derivation {
     }
 
     #|{ See Stabler (2013)}
-    method scan(QueueItem $pred) of Derivation {
+    method scan(QueueItem $pred, Int $child_place) of Derivation {
+        my $leave = $pred.node.children[$child_place];
 
+        my $start_place = 1;
+        $start_place = 0 if $leave.label eq "";
+
+        my $struc = $.structure;
+        $struc.add_to_end((DerivTree.new(label => "{$leave.label}",\
+                                             children => ())));
+        return Derivation.new(input => @.input[$start_place..*], q => $.q, $struc);
     }
 
     #|{ See Stabler (2013)}
-    method merge1(QueueItem $pred, Node @leaves, Node $selected) of Derivation {
+    # We pass most of the state around because we have to calculate all of this
+    # anyway to check whether or not we need to to run the rule.
+    method merge1(QueueItem $pred, Node @leaves, Node $selected, Node $selector) of Derivation {
+        # The following is a bit of a mess. It closely follows the way the rule
+        # was written in Stabler (2013), so if you're trying to understand this,
+        # it may be a good idea to read that first.
+        my $new_node = LexNode.new( label => $selector.label, children => @leaves);
 
+        my $f_item = QueueItem.new(priority => $pred.priority.add_p(0),\
+                                   movers => (),\
+                                   node => $new_node);
+
+        my $s_item = QueueItem.new(priority => $pred.priority.add_p(1),\
+                                   movers => $pred.movers,\
+                                   node => $selected);
+
+        my $nq = $.q;
+        $nq.push($f_item); $nq.push($s_item);
+
+        my $struc = $.structure;
+        $struc.add_to_end(DerivTree.new(label => "merge1({$selector.to_str}, {$selected.to_str})",\
+                                             children => ()));
+
+        return Derivation.new(input => @.input, q => $nq, structure => $struc);
     }
 
     #|{ See Stabler (2013)}
-    method merge2(QueueItem $pred, Node @non_terms, Node $selected) of Derivation {
+    method merge2(QueueItem $pred, Node @non_terms, Node $selected, Node $selector) of Derivation {
+        my $new_node = LexNode.new( label => $selector.label, children => @non_terms);
 
+        my $f_item = QueueItem.new(priority => $pred.priority.add_p(1),\
+                                   movers => $pred.movers,\
+                                   node => $new_node);
+
+        my $s_item = QueueItem.new(priority => $pred.priority.add_p(0),\
+                                   movers => (),\
+                                   node => $selected);
+
+        my $nq = $.q;
+        $nq.push($f_item); $nq.push($s_item);
+
+        my $struc = $.structure;
+        $struc.add_to_end(DerivTree.new(label => "merge2({$selector.to_str}, {$selected.to_str})",\
+                                             children => ()));
+
+        return Derivation.new(input => @.input, q => $nq, structure => $struc);
     }
 
     #|{ See Stabler (2013)}
@@ -234,8 +301,8 @@ class Derivation {
         my @retv = Nil;
 
         # SCAN CONSIDERED. NEEDS MERGE1-4 and MOVE1-2.
-        if $this_prediction.node.has_child(@.input[0]) {
-            my $scanned = self.scan($this_prediction);
+        if $this_prediction.node.has_child(@.input[0]) -> $child_place {
+            my $scanned = self.scan($this_prediction, $child_place);
             append @retv, $scanned if $scanned;
         }
 
@@ -249,22 +316,22 @@ class Derivation {
         if $this_prediction.node.children_with_property($IS_SELECTOR) -> @selector_ch {
             # We iterate over every child that is a selector. Applying MERGE1
             # and/or MERGE2 if the conditions are met.
-SEL_LOOP:   for @selector_ch -> $selec {
+SEL_LOOP:   for @selector_ch -> $selector {
                 # The following code checks that there is a node immediately below
                 # ROOT that has the proper category.
                 my $selected;
-                my $selected_f = MinG::Feature.new(way => MERGE, pol => MINUS, type => $selec.label.type);
+                my $selected_f = MinG::Feature.new(way => MERGE, pol => MINUS, type => $selector.label.type);
                 my $selected_ind = $lexical_tree.has_child($selected_f);
                 $selected = $lexical_tree.children[$selected_ind] if $selected_ind;
 
                 # Get all leaves and do MERGE1
-                if $selec.children_with_property($IS_NOT_FEAT) -> @leaves {
-                    my $merged = self.merge1($this_prediction, @leaves, $selected);
+                if $selector.children_with_property($IS_NOT_FEAT) -> @leaves {
+                    my $merged = self.merge1($this_prediction, @leaves, $selected, $selector);
                     append @retv, $merged if $merged;
                 }
                 # Get all non-leaves and do MERGE2
-                if $selec.children_with_property($IS_FEAT_NODE) -> @non_terms {
-                    my $merged = self.merge2($this_prediction, @non_terms, $selected);
+                if $selector.children_with_property($IS_FEAT_NODE) -> @non_terms {
+                    my $merged = self.merge2($this_prediction, @non_terms, $selected, $selector);
                     append @retv, $merged if $merged;
                 }
             }
@@ -347,5 +414,27 @@ class MinG::S13::Parser {
         } else {
             return False;
         }
+    }
+
+    #|{
+        Method that sets up a parser with a certain grammar and a certain input (taken as a string for convenience, converted to lower case and an array as needed) and creates the first derivation.
+        }
+    method setup(MinG::Grammar $g, Str $inp) {
+        my @proper_input = $.inp.lc.split(' ');
+
+        # We set up the $lexical_tree global variable. This should probably be
+        # the only place where we do this.
+        $lexical_tree = $g.litem_tree();
+        my $start_ind = $lexical_tree.has_child($g.start_cat);
+
+        my $que = Queue.new(items => (QueueItem.new(priority => Priority.new(pty => (0),\
+                                                    node => $lexical_tree.children[$start_ind],\
+                                                    movers => ()\
+                                                    ))));
+        my $start_dev = Derivation.new(input => @proper_input,\
+                                       q => $que,\
+                                       structure => Node.new(label => "ROOT", children => ())\
+                                       );
+        push @.devq, $start_dev;                               
     }
 }
