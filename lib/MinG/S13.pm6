@@ -146,8 +146,8 @@ class DerivTree is Node {};
     Class that represents one derivation.
     }
 class Derivation {
-    has Str @input;
-    has Queue $q;
+    has Str @.input;
+    has Queue $.q;
     # $structure holds the current derivation tree of the derivation.
     has DerivTree $structure;
 
@@ -155,12 +155,17 @@ class Derivation {
         Method that returns whether this derivation still needs more steps.
         }
     method still_going() of Bool {
-        return @input.elems > 0 and $q.elems > 0;
+        return (@.input.elems > 0) || ($.q.elems > 0);
+    }
+
+    #|{ See Stabler (2013)}
+    method scan() of Derivation {
+
     }
 
     #|{ See Stabler (2013)}
     method merge1() of Derivation {
-        
+
     }
 
     #|{ See Stabler (2013)}
@@ -191,6 +196,18 @@ class Derivation {
     #|{
         Method that gets the expansions to be had in the next step.
         }
+    method exps() of Array[Derivation] {
+        my $this_prediction = $.q.pop();
+        my @retv = Nil;
+
+        # SCAN CONSIDERED. NEEDS MERGE1-4 and MOVE1-2.
+        if $this_prediction.node.has_child(@.input[0]) {
+            my $scanned = self.scan();
+            append @retv, $scanned if $scanned;
+        }
+
+        return @retv;
+    }
 }
 
 #####################################################
@@ -233,7 +250,8 @@ class MinG::S13 {
         }
     method procedural_run() of DerivTree {
         my $this_dev = @!devq.pop();
-        append @!devq, $this_dev.exps();
+        my $new_exps = $this_dev.exps();
+        append @!devq, $new_exps if $new_exps; # Do not append if it is Nil.
         return $this_dev.structure;
     }
 
