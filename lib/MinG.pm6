@@ -119,9 +119,9 @@ class Node {
 
     #|{ Get all the children of this Node that have property &p }
     method children_with_property (Code $p) of Array[Node] {
-        my Node @retv = Nil;
+        my Node @retv;
         for @.children -> $this {
-            if $p.ACCEPTS($this) {
+            if $p($this) {
                 @retv.push($this);
             }
         }

@@ -40,7 +40,7 @@ my $tit = MinG::LItem.new(phon => "abc", sem => "", features => (fs("+A")));
 
 $g = MinG::Grammar.new(lex => ($fit, $sit, $tit));
 my $t = $g.litem_tree;
-ok $t.children_with_property(-> $x { $x.str_label eqv "+A " }).elems == 1;
+ok $t.children_with_property(-> $x { $x.feat_node and $x.label.way == MERGE }).elems == 1;
 $q = $t.qtree;
 say $q;
 ok "[.ROOT  [.=A abc ] [.+A jas abc ] ] " eq $q;
