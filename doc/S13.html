@@ -34,8 +34,8 @@
 <caption><h2 id="TOC_Title">Table of Contents</h2></caption>
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
   <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS]">INTERNAL CLASSES AND FUNCTIONS]</a></td></tr>
-               <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
-   
+                       <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
+     
 </table>
 </nav>
 
@@ -77,14 +77,54 @@ Method that deletes the highest-priority item and returns it. Linear time.
 <code class="pod-code-inline">push:(Queue $: QueueItem $new, *%_)</code>:
 Method that adds an element to the Queue. This runs in constant time.
 </article>
-<h1>DerivTree: Class that represents derivation trees. As of now, they&#39;re just Nodes.</h1><h1>Derivation: Class that represents one derivation.</h1><h1 id="EXPORTED_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">EXPORTED CLASSES AND FUNCTIONS</a></h1>
-<h1>MinG::S13: Class that implements the parser per se. This is where all the magic happens.</h1><article>
-<code class="pod-code-inline">parallel_run:(MinG::S13 $: *%_)</code>:
-Method that runs one iteration of the parsing loop, running one step of each derivation in parallel.
+<article>
+<code class="pod-code-inline">elems:(Queue $: *%_ --&gt; Int)</code>:
+Method that gets the amount of elements in the Queue. It&#39;s not reliable because we keep deleted items in the @.items array. We get the right result when there&#39;s 0 elements because Perl6 deletes pseudo-deleted elements from the end of the array (even if they were pseudo-deleted a long time ago). Note: I guess this could easily break with future implementations of Perl6.
+</article>
+<h1>DerivTree: Class that represents derivation trees. As of now, they&#39;re just Nodes.</h1><h1>Derivation: Class that represents one derivation.</h1><article>
+<code class="pod-code-inline">still_going:(Derivation $: *%_ --&gt; Bool)</code>:
+Method that returns whether this derivation still needs more steps.
 </article>
 <article>
-<code class="pod-code-inline">procedural_run:(MinG::S13 $: *%_)</code>:
+<code class="pod-code-inline">merge1:(Derivation $: *%_ --&gt; Derivation)</code>:
+See Stabler (2013)
+</article>
+<article>
+<code class="pod-code-inline">merge2:(Derivation $: *%_ --&gt; Derivation)</code>:
+See Stabler (2013)
+</article>
+<article>
+<code class="pod-code-inline">merge3:(Derivation $: *%_ --&gt; Derivation)</code>:
+See Stabler (2013)
+</article>
+<article>
+<code class="pod-code-inline">merge4:(Derivation $: *%_ --&gt; Derivation)</code>:
+See Stabler (2013)
+</article>
+<article>
+<code class="pod-code-inline">move1:(Derivation $: *%_ --&gt; Derivation)</code>:
+See Stabler (2013)
+</article>
+<article>
+<code class="pod-code-inline">move2:(Derivation $: *%_ --&gt; Derivation)</code>:
+See Stabler (2013)
+</article>
+<h1 id="EXPORTED_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">EXPORTED CLASSES AND FUNCTIONS</a></h1>
+<h1>MinG::S13: Method that gets the expansions to be had in the next step. Class that implements the parser per se. This is where all the magic happens.</h1><article>
+<code class="pod-code-inline">parallel_run:(MinG::S13 $: *%_)</code>:
+Method that runs one iteration of the parsing loop, running one step of each derivation in parallel. Gets all possible derivations.
+</article>
+<article>
+<code class="pod-code-inline">procedural_run:(MinG::S13 $: *%_ --&gt; DerivTree)</code>:
 Method that runs one iteration of the parsing loop, running one step of one derivation only. No parallel computation.
+</article>
+<article>
+<code class="pod-code-inline">parallel_parse:(MinG::S13 $: *%_ --&gt; Bool)</code>:
+Method that runs the main parsing loop using parallel_run. Gets all possible derivations.
+</article>
+<article>
+<code class="pod-code-inline">procedural_parse:(MinG::S13 $: *%_ --&gt; Bool)</code>:
+Method that runs the main parseing loop using procedural_run. Stops after it finds the first derivation.
 </article>
 
 </div>

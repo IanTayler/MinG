@@ -128,6 +128,13 @@ class Queue {
     method push(QueueItem $new) {
         push @.items, $new;
     }
+
+    #|{
+        Method that gets the amount of elements in the Queue. It's not reliable because we keep deleted items in the @.items array. We get the right result when there's 0 elements because Perl6 deletes pseudo-deleted elements from the end of the array (even if they were pseudo-deleted a long time ago). Note: I guess this could easily break with future implementations of Perl6.
+        }
+    method elems() of Int {
+        return @.items.elems;
+    }
 }
 
 #|{
@@ -141,6 +148,49 @@ class DerivTree is Node {};
 class Derivation {
     has Str @input;
     has Queue $q;
+    # $structure holds the current derivation tree of the derivation.
+    has DerivTree $structure;
+
+    #|{
+        Method that returns whether this derivation still needs more steps.
+        }
+    method still_going() of Bool {
+        return @input.elems > 0 and $q.elems > 0;
+    }
+
+    #|{ See Stabler (2013)}
+    method merge1() of Derivation {
+        
+    }
+
+    #|{ See Stabler (2013)}
+    method merge2() of Derivation {
+
+    }
+
+    #|{ See Stabler (2013)}
+    method merge3() of Derivation {
+
+    }
+
+    #|{ See Stabler (2013)}
+    method merge4() of Derivation {
+
+    }
+
+    #|{ See Stabler (2013)}
+    method move1() of Derivation {
+
+    }
+
+    #|{ See Stabler (2013)}
+    method move2() of Derivation {
+
+    }
+
+    #|{
+        Method that gets the expansions to be had in the next step.
+        }
 }
 
 #####################################################
@@ -155,14 +205,21 @@ class Derivation {
     }
 class MinG::S13 {
     has Derivation @!devq;
+    # Trees of successful derivations!
+    has DerivTree @results;
 
     #|{
-        Method that runs one iteration of the parsing loop, running one step of each derivation in parallel.
+        Method that runs one iteration of the parsing loop, running one step of each derivation in parallel. Gets all possible derivations.
         }
     method parallel_run() {
+        # Notice we're using Promises.
         my @promises;
         for @!devq -> $dev {
-            push @promises, Promise.start({ $dev.exps() });
+            if not($dev.still_going()) {
+                push @results, $dev.structure;
+            } else {
+                push @promises, Promise.start({ $dev.exps() });
+            }
         }
         my @newdevq;
         for @promises -> $prom {
@@ -174,7 +231,39 @@ class MinG::S13 {
     #|{
         Method that runs one iteration of the parsing loop, running one step of one derivation only. No parallel computation.
         }
-    method procedural_run() {
-        append @!devq, @!devq.pop().exps();
+    method procedural_run() of DerivTree {
+        my $this_dev = @!devq.pop();
+        append @!devq, $this_dev.exps();
+        return $this_dev.structure;
+    }
+
+    #|{
+        Method that runs the main parsing loop using parallel_run. Gets all possible derivations.
+        }
+    method parallel_parse() of Bool {
+        while @!devq.elems > 0 {
+            self.parallel_run();
+        }
+        if @results.elems == 0 {
+            return False;
+        } else {
+            return True;
+        }
+    }
+
+    #|{
+        Method that runs the main parseing loop using procedural_run. Stops after it finds the first derivation.
+        }
+    method procedural_parse() of Bool {
+        my $poss_result;
+        while @!devq.elems > 0 and @!devq[@!devq.end].still_going {
+            $poss_result = self.procedural_run();
+        }
+        if @!devq.elems == 0 {
+            @!results.push($poss_result);
+            return True;
+        } else {
+            return False;
+        }
     }
 }
