@@ -118,20 +118,20 @@ See Stabler (2013)
 Method that gets the expansions to be had in the next step.
 </article>
 <h1 id="EXPORTED_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">EXPORTED CLASSES AND FUNCTIONS</a></h1>
-<h1>MinG::S13: Class that implements the parser per se. This is where all the magic happens.</h1><article>
-<code class="pod-code-inline">parallel_run:(MinG::S13 $: *%_)</code>:
+<h1>MinG::S13::Parser: Class that implements the parser per se. This is not where the magic happens, but it is where most of the external API is defined.</h1><article>
+<code class="pod-code-inline">parallel_run:(MinG::S13::Parser $: *%_)</code>:
 Method that runs one iteration of the parsing loop, running one step of each derivation in parallel. Gets all possible derivations.
 </article>
 <article>
-<code class="pod-code-inline">procedural_run:(MinG::S13 $: *%_ --&gt; DerivTree)</code>:
+<code class="pod-code-inline">procedural_run:(MinG::S13::Parser $: *%_ --&gt; DerivTree)</code>:
 Method that runs one iteration of the parsing loop, running one step of one derivation only. No parallel computation.
 </article>
 <article>
-<code class="pod-code-inline">parallel_parse:(MinG::S13 $: *%_ --&gt; Bool)</code>:
+<code class="pod-code-inline">parallel_parse:(MinG::S13::Parser $: *%_ --&gt; Bool)</code>:
 Method that runs the main parsing loop using parallel_run. Gets all possible derivations.
 </article>
 <article>
-<code class="pod-code-inline">procedural_parse:(MinG::S13 $: *%_ --&gt; Bool)</code>:
+<code class="pod-code-inline">procedural_parse:(MinG::S13::Parser $: *%_ --&gt; Bool)</code>:
 Method that runs the main parseing loop using procedural_run. Stops after it finds the first derivation.
 </article>
 

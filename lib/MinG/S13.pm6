@@ -14,6 +14,32 @@ MinG::S13 -- Stabler's (2013) parser.
 =head1 INTERNAL CLASSES AND FUNCTIONS]
 =end pod
 
+#################################################################################
+# Implemented the 'current' lexical tree as a global variable.
+# This is the ugliest thing in the implementation. Should I at one point fix it?
+# There's reasons for this global variable. Derivations need to have access to the
+# lexical tree, but derivation objects are notoriously short-lived (they normally
+# last a single step). So, having a lexical tree as an attribute of derivations means
+# we'll copy it many times unnecessarily, given that the tree is the same for the whole
+# parsing.
+#
+# Having this global variable is efficient and it's not very dangerous. While many
+# things need to access it, only the parser ever changes it and it does it only
+# once per parse. Taboos aside, I don't think this is so bad, just as long as this
+# rule is followed:
+#
+########################################
+# GLORIOUS RULE OF MAXIMUM IMPORTANCE: #
+#**************************************************************
+#* DO NOT UNDER ANY CIRCUMSTANCES CHANGE THE VALUE OF THIS    *
+#*    VARIABLE FROM OUTSIDE THE MinG::S13::Parser CLASS.      *
+#**************************************************************
+my Node $lexical_tree;
+##########
+#      ^ #
+# THIS | #
+##########
+
 #|{
     Objects in this class describe positions in a Queue.
     }
@@ -206,6 +232,8 @@ class Derivation {
             append @retv, $scanned if $scanned;
         }
 
+        #
+
         return @retv;
     }
 }
@@ -218,9 +246,9 @@ class Derivation {
 =end pod
 
 #|{
-    Class that implements the parser per se. This is where all the magic happens.
+    Class that implements the parser per se. This is not where the magic happens, but it is where most of the external API is defined.
     }
-class MinG::S13 {
+class MinG::S13::Parser {
     has Derivation @!devq;
     # Trees of successful derivations!
     has DerivTree @results;

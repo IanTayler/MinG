@@ -4,7 +4,7 @@ use lib 'lib';
 use MinG;
 use MinG::S13;
 
-plan 5;
+plan 6;
 
 sub fs(Str $s) {
     return feature_from_str($s);
@@ -31,21 +31,22 @@ my $q = $g.litem_tree.qtree();
 say $q;
 ok "[.ROOT  [.=A abc ] ] " eq $q;
 
-###############
-# FOURTH TEST #
-###############
+##########################
+# FOURTH AND FIFTH TESTS #
+##########################
 $fit = MinG::LItem.new(phon => "abc", sem => "", features => (fs("=A")));
 my $sit = MinG::LItem.new(phon => "jas", sem => "", features => (fs("+A")));
 my $tit = MinG::LItem.new(phon => "abc", sem => "", features => (fs("+A")));
 
 $g = MinG::Grammar.new(lex => ($fit, $sit, $tit));
 my $t = $g.litem_tree;
+ok $t.children_with_property(-> $x { $x.str_label eqv "+A " }).elems == 1;
 $q = $t.qtree;
 say $q;
 ok "[.ROOT  [.=A abc ] [.+A jas abc ] ] " eq $q;
 
 ##############
-# FIFTH TEST #
+# SIXTH TEST #
 ##############
 $fit = MinG::LItem.new(phon => "abc", sem => "", features => (fs("=A")));
 $sit = MinG::LItem.new(phon => "gogo", sem => "", features => (fs("+A"), fs("=B"), fs("C")));

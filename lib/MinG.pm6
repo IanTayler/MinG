@@ -97,7 +97,7 @@ class Node {
 
     #|{ Get this Node's feature-node-children.}
     method feat_children() of Array[Node] {
-        my @retv = ();
+        my Node @retv = Nil;
         for @.children -> $this {
             if $this.feat_node {
                 @retv.push($this);
@@ -108,9 +108,20 @@ class Node {
 
     #|{ Get this Node's non-feature-node-children.}
     method non_feat_children() of Array[Node] {
-        my @retv = ();
+        my Node @retv = Nil;
         for @.children -> $this {
             unless $this.feat_node {
+                @retv.push($this);
+            }
+        }
+        return @retv;
+    }
+
+    #|{ Get all the children of this Node that have property &p }
+    method children_with_property (Code $p) of Array[Node] {
+        my Node @retv = Nil;
+        for @.children -> $this {
+            if $p.ACCEPTS($this) {
                 @retv.push($this);
             }
         }
