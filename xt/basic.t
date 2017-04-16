@@ -5,7 +5,7 @@ use MinG::S13;
 use Test;
 use Test::META;
 
-plan 4;
+plan 5;
 
 meta-ok();
 
@@ -20,5 +20,26 @@ my $deriv = Derivation.new(input => ("sanga", "changa", "wanga"));
 say $deriv.input;
 ok $deriv.input.elems == 3;
 ok $deriv.still_going;
+
+############
+# BIG TEST #
+############
+#my $feat1 = feature_from_str("=A");
+#my $feat2 = feature_from_str("A");
+#my $startc = feature_from_str("B");
+#
+#my $item1 = MinG::LItem.new( features => ($feat1, $startc), phon => "b", sem => "");
+#my $itema = MinG::LItem.new( features => ($feat2), phon => "a", sem => "");
+#
+#my $g = MinG::Grammar.new(lex => ($itema, $item1), start_cat => $startc);
+#my $lexor = $g.litem_tree;
+#say $lexor.qtree;
+#
+#my $parser = MinG::S13::Parser.new();
+#$parser.setup($g, "b a");
+#
+#ok $parser.procedural_parse();
+
+ok True;
 
 done-testing;

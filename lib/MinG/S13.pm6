@@ -1,4 +1,5 @@
 use strict;
+use trace;
 use MinG;
 
 =begin pod
@@ -221,7 +222,7 @@ class Derivation {
         my $struc = $.structure;
         $struc.add_to_end((DerivTree.new(label => "{$leave.label}",\
                                              children => ())));
-        return Derivation.new(input => @.input[$start_place..*], q => $.q, $struc);
+        return Derivation.new(input => @.input[$start_place..*], q => $.q, structure => $struc);
     }
 
     #|{ See Stabler (2013)}
@@ -245,7 +246,7 @@ class Derivation {
         $nq.push($f_item); $nq.push($s_item);
 
         my $struc = $.structure;
-        $struc.add_to_end(DerivTree.new(label => "merge1({$selector.to_str}, {$selected.to_str})",\
+        $struc.add_to_end(DerivTree.new(label => "merge1({$selector.str_label}, {$selected.str_label})",\
                                              children => ()));
 
         return Derivation.new(input => @.input, q => $nq, structure => $struc);
@@ -267,7 +268,7 @@ class Derivation {
         $nq.push($f_item); $nq.push($s_item);
 
         my $struc = $.structure;
-        $struc.add_to_end(DerivTree.new(label => "merge2({$selector.to_str}, {$selected.to_str})",\
+        $struc.add_to_end(DerivTree.new(label => "merge2({$selector.str_label}, {$selected.str_label})",\
                                              children => ()));
 
         return Derivation.new(input => @.input, q => $nq, structure => $struc);
@@ -296,9 +297,10 @@ class Derivation {
     #|{
         Method that gets the expansions to be had in the next step. Check the code's comments for more details.
         }
-    method exps() of Array[Derivation] {
+    method exps() of Array {
         my $this_prediction = $.q.pop();
-        my @retv = Nil;
+        say $this_prediction.node;
+        my @retv;
 
         # SCAN CONSIDERED. NEEDS MERGE1-4 and MOVE1-2.
         if $this_prediction.node.has_child(@.input[0]) -> $child_place {
@@ -337,6 +339,7 @@ SEL_LOOP:   for @selector_ch -> $selector {
             }
         }
 
+        print "RETV: "; say @retv;
         return @retv;
     }
 }
@@ -356,6 +359,9 @@ class MinG::S13::Parser {
     # Trees of successful derivations!
     has DerivTree @results;
 
+    method devq() {
+        return @!devq;
+    }
     #|{
         Method that runs one iteration of the parsing loop, running one step of each derivation in parallel. Gets all possible derivations.
         }
@@ -381,8 +387,8 @@ class MinG::S13::Parser {
         }
     method procedural_run() of DerivTree {
         my $this_dev = @!devq.pop();
-        my $new_exps = $this_dev.exps();
-        append @!devq, $new_exps if $new_exps; # Do not append if it is Nil.
+        my @new_exps = $this_dev.exps();
+        append @!devq, @new_exps if @new_exps; # Do not append if it is Nil.
         return $this_dev.structure;
     }
 
@@ -420,21 +426,48 @@ class MinG::S13::Parser {
         Method that sets up a parser with a certain grammar and a certain input (taken as a string for convenience, converted to lower case and an array as needed) and creates the first derivation.
         }
     method setup(MinG::Grammar $g, Str $inp) {
-        my @proper_input = $.inp.lc.split(' ');
+        my @proper_input = $inp.lc.split(' ');
 
         # We set up the $lexical_tree global variable. This should probably be
         # the only place where we do this.
         $lexical_tree = $g.litem_tree();
         my $start_ind = $lexical_tree.has_child($g.start_cat);
 
-        my $que = Queue.new(items => (QueueItem.new(priority => Priority.new(pty => (0),\
-                                                    node => $lexical_tree.children[$start_ind],\
-                                                    movers => ()\
-                                                    ))));
+        die "bad start symbol for the grammar!" without $start_ind;
+
+        my $start_categ = $lexical_tree.children[$start_ind];
+
+        my $que = Queue.new(items => (QueueItem.new(priority => Priority.new(pty => (0)),\
+                                                    movers => (),\
+                                                    node => $start_categ,\
+                                                    )));
         my $start_dev = Derivation.new(input => @proper_input,\
                                        q => $que,\
-                                       structure => Node.new(label => "ROOT", children => ())\
+                                       structure => DerivTree.new(label => "ROOT", children => ())\
                                        );
-        push @.devq, $start_dev;                               
+        push @!devq, $start_dev;
     }
+}
+
+###############################
+#            TEST             #
+###############################
+sub MAIN() {
+    my $feat1 = feature_from_str("=A");
+    my $feat2 = feature_from_str("A");
+    my $startc = feature_from_str("B");
+
+    my $item1 = MinG::LItem.new( features => ($feat1, $startc), phon => "b", sem => "");
+    my $itema = MinG::LItem.new( features => ($feat2), phon => "a", sem => "");
+
+    my $g = MinG::Grammar.new(lex => ($itema, $item1), start_cat => $startc);
+    my $lexor = $g.litem_tree;
+    say $lexor.qtree;
+
+    my $parser = MinG::S13::Parser.new();
+    $parser.setup($g, "b a");
+
+    say $parser.devq;
+
+    say $parser.procedural_parse();
 }
