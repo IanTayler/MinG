@@ -43,10 +43,14 @@ CURRENTLY
 
   * Automatically generates LaTeX/qtree code for trees. (Node.qtree inside MinG)
 
+  * Has a merge-only working parser for MGs! (MinG::S13::Parser or MinG::S13.parse_and_spit())
+
 TODO
 ====
 
-  * Make a parser for the MGs described.
+  * Make a parser to read grammars from a file. (Will bump to 0.5.0)
+
+  * Finish the parser so that it includes move-cases. (Will bump to 1.0.0)
 
   * Allow some useful expansions of MGs.
 

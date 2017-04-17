@@ -35,7 +35,7 @@
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
   <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS]">INTERNAL CLASSES AND FUNCTIONS]</a></td></tr>
                           <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
-      
+        
 </table>
 </nav>
 
@@ -141,6 +141,14 @@ Method that runs the main parseing loop using procedural_run. Stops after it fin
 <article>
 <code class="pod-code-inline">setup:(MinG::S13::Parser $: MinG::Grammar $g, Str $inp, *%_)</code>:
 Method that sets up a parser with a certain grammar and a certain input (taken as a string for convenience, converted to lower case and an array as needed) and creates the first derivation.
+</article>
+<article>
+<code class="pod-code-inline">parse_me:(MinG::S13::Parser $: MinG::Grammar $g, Str $inp, ParseWay $do = ParseWay::PARALLEL, *%_)</code>:
+Method to set the parser up, parse and spit the result. All in one go.
+</article>
+<article>
+<code class="pod-code-inline">parse_and_spit:(MinG::Grammar $g, Str $inp, ParseWay $waytoparse = ParseWay::PARALLEL)</code>:
+This is a wrapper subroutine to save to avoid using the MinG::S13::Parser class directly.
 </article>
 
 </div>
