@@ -24,22 +24,34 @@ ok $deriv.still_going;
 ############
 # BIG TEST #
 ############
-#my $feat1 = feature_from_str("=A");
-#my $feat2 = feature_from_str("A");
-#my $startc = feature_from_str("B");
-#
-#my $item1 = MinG::LItem.new( features => ($feat1, $startc), phon => "b", sem => "");
-#my $itema = MinG::LItem.new( features => ($feat2), phon => "a", sem => "");
-#
-#my $g = MinG::Grammar.new(lex => ($itema, $item1), start_cat => $startc);
-#my $lexor = $g.litem_tree;
-#say $lexor.qtree;
-#
-#my $parser = MinG::S13::Parser.new();
-#$parser.setup($g, "b a");
-#
-#ok $parser.procedural_parse();
+my $parser = MinG::S13::Parser.new();
 
-ok True;
+my $c = feature_from_str("C");
+my $selv = feature_from_str("=V");
+my $v = feature_from_str("V");
+my $d = feature_from_str("D");
+my $seld = feature_from_str("=D");
+
+my $force = MinG::LItem.new( features => ($selv, $c), phon => "");
+my $juan = MinG::LItem.new( features => ($d), phon => "juan");
+my $come = MinG::LItem.new( features => ($seld, $seld, $v), phon => "come");
+my $escupe = MinG::LItem.new( features => ($seld, $seld, $v), phon => "escupe");
+my $pan = MinG::LItem.new( features => ($d), phon => "pan");
+my $manteca = MinG::LItem.new( features => ($d), phon => "manteca");
+
+my $g = MinG::Grammar.new(lex => ($juan, $come, $escupe, $pan, $manteca, $force), start_cat => $c);
+
+my @frases = ["Juan come pan", "manteca escupe Juan", "come escupe Juan", "Juan", "come", "Pan Come Manteca"];
+
+my Bool $all-fine = True;
+
+$all-fine &&= $parser.parse_me($g, @frases[0]);
+$all-fine &&= $parser.parse_me($g, @frases[1]);
+$all-fine &&= not($parser.parse_me($g, @frases[2]));
+$all-fine &&= not($parser.parse_me($g, @frases[3]));
+$all-fine &&= not($parser.parse_me($g, @frases[4]));
+$all-fine &&= $parser.parse_me($g, @frases[5]);
+
+ok $all-fine;
 
 done-testing;

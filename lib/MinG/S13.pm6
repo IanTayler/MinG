@@ -1,5 +1,4 @@
 use strict;
-use trace;
 use MinG;
 
 =begin pod
@@ -14,13 +13,25 @@ MinG::S13 -- Stabler's (2013) parser.
 =begin pod
 =head1 INTERNAL CLASSES AND FUNCTIONS]
 =end pod
+######################
+# DEBUGGING   TOOLS  #
+######################
+#constant $DEBUG is export = 0;
+#sub debug(Str $s) {
+#    if $DEBUG {
+#        say $s;
+#    }
+#}
+#our $run_number is export = 1 if $DEBUG;
 
 #############
 # CONSTANTS #
 #############
-constant $IS_SELECTOR  = -> Node $x { $x.feat_node and $x.label.way == MERGE and $x.label.pol == PLUS };
-constant $IS_FEAT_NODE = -> Node $x { $x.feat_node };
-constant $IS_NOT_FEAT  = -> Node $x { not ($x.feat_node) };
+constant $IS_SELECTOR is export = -> Node $x { $x.feat_node and $x.label.way == MERGE and $x.label.pol == PLUS };
+constant $IS_FEAT_NODE is export = -> Node $x { $x.feat_node };
+constant $IS_NOT_FEAT  is export = -> Node $x { not ($x.feat_node) };
+
+enum ParseWay < PROCEDURAL PARALLEL >;
 
 #################################################################################
 # Implemented the 'current' lexical tree as a global variable.
@@ -42,7 +53,7 @@ constant $IS_NOT_FEAT  = -> Node $x { not ($x.feat_node) };
 #* DO NOT UNDER ANY CIRCUMSTANCES CHANGE THE VALUE OF THIS    *
 #*    VARIABLE FROM OUTSIDE THE MinG::S13::Parser CLASS.      *
 #**************************************************************
-my Node $lexical_tree;
+our $s13_global_lexical_tree is export;
 ##########
 #      ^ #
 # THIS | #
@@ -137,12 +148,21 @@ class Queue {
     method ind_max() of Int {
         if @.items.elems == 0 {
             # It may or may not be better to die here. I'm letting it be for now.
-            return Nil;
+            # Actually, nope. Dying here.
+            die "Hey, this queue is empty!!!";
         }
-        my $highest = @.items[0];
-        my $index = 0;
-        loop (my uint16 $i = 1; $i < @.items.elems; $i++) {
-            next if @.items[$i] eqv (QueueItem);
+
+        # The start may be empty without the whole thing being empty, so we need
+        # to find the first non-empty place
+        my uint16 $first_place = 0;
+        # This is supposed to be safe because we already checked that the array
+        # isn't empty. We may be in for a surprise in a few months, though.
+        loop (; not(@.items[$first_place]); $first_place++){};
+        my $highest = @.items[$first_place];
+
+        my $index = $first_place;
+        loop (my uint16 $i = $first_place; $i < @.items.elems; $i++) {
+            next unless @.items[$i];
             if @.items[$i].bigger_than($highest) {
                 $highest = @.items[$i];
                 $index = $i;
@@ -216,6 +236,7 @@ class Derivation {
     method scan(QueueItem $pred, Int $child_place) of Derivation {
         my $leave = $pred.node.children[$child_place];
 
+        #debug("Scanned {$leave.label}");
         my $start_place = 1;
         $start_place = 0 if $leave.label eq "";
 
@@ -244,7 +265,6 @@ class Derivation {
 
         my $nq = $.q;
         $nq.push($f_item); $nq.push($s_item);
-
         my $struc = $.structure;
         $struc.add_to_end(DerivTree.new(label => "merge1({$selector.str_label}, {$selected.str_label})",\
                                              children => ()));
@@ -299,11 +319,16 @@ class Derivation {
         }
     method exps() of Array {
         my $this_prediction = $.q.pop();
-        say $this_prediction.node;
         my @retv;
+        return @retv unless $this_prediction;
+
+        #debug("We got here. So prediction not empty.");
 
         # SCAN CONSIDERED. NEEDS MERGE1-4 and MOVE1-2.
         if $this_prediction.node.has_child(@.input[0]) -> $child_place {
+            my $scanned = self.scan($this_prediction, $child_place);
+            append @retv, $scanned if $scanned;
+        } elsif $this_prediction.node.has_child("") -> $child_place {
             my $scanned = self.scan($this_prediction, $child_place);
             append @retv, $scanned if $scanned;
         }
@@ -323,8 +348,8 @@ SEL_LOOP:   for @selector_ch -> $selector {
                 # ROOT that has the proper category.
                 my $selected;
                 my $selected_f = MinG::Feature.new(way => MERGE, pol => MINUS, type => $selector.label.type);
-                my $selected_ind = $lexical_tree.has_child($selected_f);
-                $selected = $lexical_tree.children[$selected_ind] if $selected_ind;
+                my $selected_ind = $s13_global_lexical_tree.has_child($selected_f);
+                $selected = $s13_global_lexical_tree.children[$selected_ind] if $selected_ind;
 
                 # Get all leaves and do MERGE1
                 if $selector.children_with_property($IS_NOT_FEAT) -> @leaves {
@@ -338,8 +363,6 @@ SEL_LOOP:   for @selector_ch -> $selector {
                 }
             }
         }
-
-        print "RETV: "; say @retv;
         return @retv;
     }
 }
@@ -357,7 +380,7 @@ SEL_LOOP:   for @selector_ch -> $selector {
 class MinG::S13::Parser {
     has Derivation @!devq;
     # Trees of successful derivations!
-    has DerivTree @results;
+    has DerivTree @.results;
 
     method devq() {
         return @!devq;
@@ -367,10 +390,14 @@ class MinG::S13::Parser {
         }
     method parallel_run() {
         # Notice we're using Promises.
+        #debug("Run number: $run_number");
+        #debug("\tInitial \@!devq: ");
+        #{ print "\t\t"; say @!devq; say "\n" } if $DEBUG;
+
         my @promises;
         for @!devq -> $dev {
             if not($dev.still_going()) {
-                push @results, $dev.structure;
+                push @.results, $dev.structure;
             } else {
                 push @promises, Promise.start({ $dev.exps() });
             }
@@ -379,16 +406,28 @@ class MinG::S13::Parser {
         for @promises -> $prom {
             append @newdevq, $prom.result;
         }
+
+        #debug("\tNew queue: ");
+        #{ print "\t\t"; say @newdevq; say "\n" } if $DEBUG;
         @!devq = @newdevq;
+        #$run_number++ if $DEBUG;
     }
 
     #|{
         Method that runs one iteration of the parsing loop, running one step of one derivation only. No parallel computation.
         }
     method procedural_run() of DerivTree {
+        #debug("Run number: $run_number");
+        #debug("\tInitial \@!devq: ");
+        #{ print "\t\t"; say @!devq; say "\n" } if $DEBUG;
         my $this_dev = @!devq.pop();
         my @new_exps = $this_dev.exps();
         append @!devq, @new_exps if @new_exps; # Do not append if it is Nil.
+
+        #debug("\tNew queue: ");
+        #{ print "\t\t"; say @!devq; say "\n" } if $DEBUG;
+
+        #$run_number++ if $DEBUG;
         return $this_dev.structure;
     }
 
@@ -399,7 +438,7 @@ class MinG::S13::Parser {
         while @!devq.elems > 0 {
             self.parallel_run();
         }
-        if @results.elems == 0 {
+        if @.results.elems == 0 {
             return False;
         } else {
             return True;
@@ -426,16 +465,22 @@ class MinG::S13::Parser {
         Method that sets up a parser with a certain grammar and a certain input (taken as a string for convenience, converted to lower case and an array as needed) and creates the first derivation.
         }
     method setup(MinG::Grammar $g, Str $inp) {
+        # Clean previous results:
+        @.results = ();
+
+        # Clean debugging symbols:
+        #$run_number = 1 if $DEBUG;
+
         my @proper_input = $inp.lc.split(' ');
 
-        # We set up the $lexical_tree global variable. This should probably be
+        # We set up the $s13_global_lexical_tree global variable. This should probably be
         # the only place where we do this.
-        $lexical_tree = $g.litem_tree();
-        my $start_ind = $lexical_tree.has_child($g.start_cat);
+        $s13_global_lexical_tree = $g.litem_tree();
+        my $start_ind = $s13_global_lexical_tree.has_child($g.start_cat);
 
         die "bad start symbol for the grammar!" without $start_ind;
 
-        my $start_categ = $lexical_tree.children[$start_ind];
+        my $start_categ = $s13_global_lexical_tree.children[$start_ind];
 
         my $que = Queue.new(items => (QueueItem.new(priority => Priority.new(pty => (0)),\
                                                     movers => (),\
@@ -446,6 +491,31 @@ class MinG::S13::Parser {
                                        structure => DerivTree.new(label => "ROOT", children => ())\
                                        );
         push @!devq, $start_dev;
+    }
+
+    #|{
+        Method to set the parser up, parse and spit the result. All in one go.
+        }
+    method parse_me(MinG::Grammar $g, Str $inp, ParseWay $do = PARALLEL) {
+        say "Parsing $inp.";
+        self.setup($g, $inp);
+        #debug("\tThis is the input:\n\t\t{@.devq[0].input}\n\tLength:\n\t\t{@.devq[0].input.elems}");
+        if $do == PROCEDURAL {
+            if self.procedural_parse() {
+                say "\t{@.results[0].qtree}";
+            } else {
+                say "\tThe string you passed is not in the language.";
+            }
+        } else {
+            if self.parallel_parse() {
+                for @.results -> $res {
+                    say "\t{$res.qtree}";
+                }
+            } else {
+                say "\tThe string you passed is not in the language.";
+            }
+        }
+
     }
 }
 
@@ -462,12 +532,35 @@ sub MAIN() {
 
     my $g = MinG::Grammar.new(lex => ($itema, $item1), start_cat => $startc);
     my $lexor = $g.litem_tree;
-    say $lexor.qtree;
+    say "{$lexor.qtree}\n";
 
     my $parser = MinG::S13::Parser.new();
-    $parser.setup($g, "b a");
 
-    say $parser.devq;
+    my @things = ["", "a", "b", "b a", "a b a", "abab"];
 
-    say $parser.procedural_parse();
+    for @things -> $thing {
+        say "\n\tPROCEDURAL: ";
+        $parser.parse_me($g, $thing, PROCEDURAL);
+
+        say "\n\tPARALLEL: ";
+        $parser.parse_me($g, $thing, PARALLEL);
+    }
+
+    my $c = feature_from_str("C"); my $selv = feature_from_str("=V"); my $v = feature_from_str("V"); my $d = feature_from_str("D"); my $seld = feature_from_str("=D");
+
+    my $force = MinG::LItem.new( features => ($selv, $c), phon => ""); my $juan = MinG::LItem.new( features => ($d), phon => "juan"); my $come = MinG::LItem.new( features => ($seld, $seld, $v), phon => "come"); my $escupe = MinG::LItem.new( features => ($seld, $seld, $v), phon => "escupe");
+    my $pan = MinG::LItem.new( features => ($d), phon => "pan"); my $manteca = MinG::LItem.new( features => ($d), phon => "manteca");
+
+    $g = MinG::Grammar.new(lex => ($juan, $come, $escupe, $pan, $manteca, $force), start_cat => $c);
+
+    my @frases = ["Juan come pan", "manteca escupe Juan", "come escupe Juan", "Juan", "come", "Pan Come Manteca"];
+
+    for @frases -> $frase {
+        #say "\n\tPROCEDURAL: ";
+        #$parser.parse_me($g, $frase, PROCEDURAL);
+
+        say "\n\tPARALLEL: ";
+        $parser.parse_me($g, $frase);
+    }
+
 }
