@@ -117,12 +117,12 @@ class Node {
         return @retv;
     }
 
-    #|{ Get all the children of this Node that have property &p }
+    #|{ Get all the children of this Node that have property $p }
     method children_with_property (Code $p) of Array[Node] {
         my Node @retv;
-        for @.children -> $this {
-            if $p($this) {
-                @retv.push($this);
+        for @.children -> $this_little_thing {
+            if $p($this_little_thing) {
+                @retv.push($this_little_thing);
             }
         }
         return @retv;

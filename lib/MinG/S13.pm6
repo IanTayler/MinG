@@ -16,20 +16,20 @@ MinG::S13 -- Stabler's (2013) parser.
 ######################
 # DEBUGGING   TOOLS  #
 ######################
-#constant $DEBUG is export = 0;
-#sub debug(Str $s) {
-#    if $DEBUG {
-#        say $s;
-#    }
-#}
-#our $run_number is export = 1 if $DEBUG;
+constant $DEBUG is export = 0;
+sub debug($s) {
+   if $DEBUG {
+       say $s;
+   }
+}
+my uint16 $run_number = 1 if $DEBUG;
 
-#############
-# CONSTANTS #
-#############
-constant $IS_SELECTOR is export = -> Node $x { $x.feat_node and $x.label.way == MERGE and $x.label.pol == PLUS };
-constant $IS_FEAT_NODE is export = -> Node $x { $x.feat_node };
-constant $IS_NOT_FEAT  is export = -> Node $x { not ($x.feat_node) };
+############################
+# CONSTANTS OR NOT SO MUCH #
+############################
+my $IS_SELECTOR = -> Node $x { $x.feat_node and $x.label.way == MERGE and $x.label.pol == PLUS };
+my $IS_FEAT_NODE = -> Node $x { $x.feat_node };
+my $IS_NOT_FEAT = -> Node $x { not ($x.feat_node) };
 
 enum ParseWay < PROCEDURAL PARALLEL >;
 
@@ -236,7 +236,7 @@ class Derivation {
     method scan(QueueItem $pred, Int $child_place) of Derivation {
         my $leave = $pred.node.children[$child_place];
 
-        #debug("Scanned {$leave.label}");
+        debug("Scanned {$leave.label}");
         my $start_place = 1;
         $start_place = 0 if $leave.label eq "";
 
@@ -322,7 +322,7 @@ class Derivation {
         my @retv;
         return @retv unless $this_prediction;
 
-        #debug("We got here. So prediction not empty.");
+        debug("We got here. So prediction not empty.");
 
         # SCAN CONSIDERED. NEEDS MERGE1-4 and MOVE1-2.
         if $this_prediction.node.has_child(@.input[0]) -> $child_place {
@@ -390,15 +390,16 @@ class MinG::S13::Parser {
         }
     method parallel_run() {
         # Notice we're using Promises.
-        #debug("Run number: $run_number");
-        #debug("\tInitial \@!devq: ");
-        #{ print "\t\t"; say @!devq; say "\n" } if $DEBUG;
+        debug("Run number: $run_number");
+        debug("\tInitial \@!devq: ");
+        { print "\t\t"; say @!devq; say "\n" } if $DEBUG;
 
         my @promises;
         for @!devq -> $dev {
             if not($dev.still_going()) {
                 push @.results, $dev.structure;
             } else {
+                debug("One element of the devq: "); debug($dev);
                 push @promises, Promise.start({ $dev.exps() });
             }
         }
@@ -407,27 +408,27 @@ class MinG::S13::Parser {
             append @newdevq, $prom.result;
         }
 
-        #debug("\tNew queue: ");
-        #{ print "\t\t"; say @newdevq; say "\n" } if $DEBUG;
+        debug("\tNew queue: ");
+        { print "\t\t"; say @newdevq; say "\n" } if $DEBUG;
         @!devq = @newdevq;
-        #$run_number++ if $DEBUG;
+        $run_number++ if $DEBUG;
     }
 
     #|{
         Method that runs one iteration of the parsing loop, running one step of one derivation only. No parallel computation.
         }
     method procedural_run() of DerivTree {
-        #debug("Run number: $run_number");
-        #debug("\tInitial \@!devq: ");
-        #{ print "\t\t"; say @!devq; say "\n" } if $DEBUG;
+        debug("Run number: $run_number");
+        debug("\tInitial \@!devq: ");
+        { print "\t\t"; say @!devq; say "\n" } if $DEBUG;
         my $this_dev = @!devq.pop();
         my @new_exps = $this_dev.exps();
         append @!devq, @new_exps if @new_exps; # Do not append if it is Nil.
 
-        #debug("\tNew queue: ");
-        #{ print "\t\t"; say @!devq; say "\n" } if $DEBUG;
+        debug("\tNew queue: ");
+        { print "\t\t"; say @!devq; say "\n" } if $DEBUG;
 
-        #$run_number++ if $DEBUG;
+        $run_number++ if $DEBUG;
         return $this_dev.structure;
     }
 
@@ -469,7 +470,7 @@ class MinG::S13::Parser {
         @.results = ();
 
         # Clean debugging symbols:
-        #$run_number = 1 if $DEBUG;
+        $run_number = 1 if $DEBUG;
 
         my @proper_input = $inp.lc.split(' ');
 
@@ -499,7 +500,7 @@ class MinG::S13::Parser {
     method parse_me(MinG::Grammar $g, Str $inp, ParseWay $do = PARALLEL) {
         say "Parsing $inp.";
         self.setup($g, $inp);
-        #debug("\tThis is the input:\n\t\t{@.devq[0].input}\n\tLength:\n\t\t{@.devq[0].input.elems}");
+        debug("\tThis is the input:\n\t\t{@.devq[0].input}\n\tLength:\n\t\t{@.devq[0].input.elems}");
         if $do == PROCEDURAL {
             if self.procedural_parse() {
                 say "\t{@.results[0].qtree}";

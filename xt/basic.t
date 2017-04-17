@@ -40,7 +40,7 @@ my $manteca = MinG::LItem.new( features => ($d), phon => "manteca");
 
 my $g = MinG::Grammar.new(lex => ($juan, $come, $escupe, $pan, $manteca, $force), start_cat => $c);
 
-parse_and_spit($g, "juan escupe pan", PROCEDURAL);
+parse_and_spit($g, "juan escupe pan");
 
 my $parser = MinG::S13::Parser.new();
 
@@ -48,12 +48,12 @@ my @frases = ["Juan come pan", "manteca escupe Juan", "come escupe Juan", "Juan"
 
 my Bool $all-fine = True;
 
-$all-fine &&= $parser.parse_me($g, @frases[0]);
-$all-fine &&= $parser.parse_me($g, @frases[1]);
-$all-fine &&= not($parser.parse_me($g, @frases[2]));
-$all-fine &&= not($parser.parse_me($g, @frases[3]));
-$all-fine &&= not($parser.parse_me($g, @frases[4]));
-$all-fine &&= $parser.parse_me($g, @frases[5]);
+$all-fine = $all-fine and $parser.parse_me($g, @frases[0]);
+$all-fine = $all-fine and $parser.parse_me($g, @frases[1]);
+$all-fine = $all-fine and not($parser.parse_me($g, @frases[2]));
+$all-fine = $all-fine and not($parser.parse_me($g, @frases[3]));
+$all-fine = $all-fine and not($parser.parse_me($g, @frases[4]));
+$all-fine = $all-fine and $parser.parse_me($g, @frases[5]);
 
 ok $all-fine;
 
