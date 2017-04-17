@@ -519,6 +519,13 @@ class MinG::S13::Parser {
     }
 }
 
+#|{
+    This is a wrapper subroutine to save to avoid using the MinG::S13::Parser class directly.
+    }
+sub parse_and_spit(MinG::Grammar $g, Str $inp, ParseWay $waytoparse = PARALLEL) is export {
+    MinG::S13::Parser.new().parse_me($g, $inp, $waytoparse);
+}
+
 ###############################
 #            TEST             #
 ###############################
@@ -548,8 +555,7 @@ sub MAIN() {
 
     my $c = feature_from_str("C"); my $selv = feature_from_str("=V"); my $v = feature_from_str("V"); my $d = feature_from_str("D"); my $seld = feature_from_str("=D");
 
-    my $force = MinG::LItem.new( features => ($selv, $c), phon => ""); my $juan = MinG::LItem.new( features => ($d), phon => "juan"); my $come = MinG::LItem.new( features => ($seld, $seld, $v), phon => "come"); my $escupe = MinG::LItem.new( features => ($seld, $seld, $v), phon => "escupe");
-    my $pan = MinG::LItem.new( features => ($d), phon => "pan"); my $manteca = MinG::LItem.new( features => ($d), phon => "manteca");
+    my $force = MinG::LItem.new( features => ($selv, $c), phon => ""); my $juan = MinG::LItem.new( features => ($d), phon => "juan"); my $come = MinG::LItem.new( features => ($seld, $seld, $v), phon => "come"); my $escupe = MinG::LItem.new( features => ($seld, $seld, $v), phon => "escupe"); my $pan = MinG::LItem.new( features => ($d), phon => "pan"); my $manteca = MinG::LItem.new( features => ($d), phon => "manteca");
 
     $g = MinG::Grammar.new(lex => ($juan, $come, $escupe, $pan, $manteca, $force), start_cat => $c);
 

@@ -24,7 +24,6 @@ ok $deriv.still_going;
 ############
 # BIG TEST #
 ############
-my $parser = MinG::S13::Parser.new();
 
 my $c = feature_from_str("C");
 my $selv = feature_from_str("=V");
@@ -40,6 +39,10 @@ my $pan = MinG::LItem.new( features => ($d), phon => "pan");
 my $manteca = MinG::LItem.new( features => ($d), phon => "manteca");
 
 my $g = MinG::Grammar.new(lex => ($juan, $come, $escupe, $pan, $manteca, $force), start_cat => $c);
+
+parse_and_spit($g, "juan escupe pan", PROCEDURAL);
+
+my $parser = MinG::S13::Parser.new();
 
 my @frases = ["Juan come pan", "manteca escupe Juan", "come escupe Juan", "Juan", "come", "Pan Come Manteca"];
 
