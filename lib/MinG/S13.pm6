@@ -132,6 +132,8 @@ class QueueItem {
         This method is a wrapper around Priority.bigger_than so that it can be called more easily from a Queue object.
         }
     method bigger_than(QueueItem $other) {
+        return False unless self;
+        return True unless $other;
         return self.priority.bigger_than($other.priority);
     }
 }
@@ -346,18 +348,18 @@ class Derivation {
 SEL_LOOP:   for @selector_ch -> $selector {
                 # The following code checks that there is a node immediately below
                 # ROOT that has the proper category.
-                my $selected;
+                my Node $selected;
                 my $selected_f = MinG::Feature.new(way => MERGE, pol => MINUS, type => $selector.label.type);
                 my $selected_ind = $s13_global_lexical_tree.has_child($selected_f);
                 $selected = $s13_global_lexical_tree.children[$selected_ind] if $selected_ind;
 
                 # Get all leaves and do MERGE1
-                if $selector.children_with_property($IS_NOT_FEAT) -> @leaves {
+                if ($selected && $selector.children_with_property($IS_NOT_FEAT)) -> @leaves {
                     my $merged = self.merge1($this_prediction, @leaves, $selected, $selector);
                     append @retv, $merged if $merged;
                 }
                 # Get all non-leaves and do MERGE2
-                if $selector.children_with_property($IS_FEAT_NODE) -> @non_terms {
+                if ($selected && $selector.children_with_property($IS_FEAT_NODE)) -> @non_terms {
                     my $merged = self.merge2($this_prediction, @non_terms, $selected, $selector);
                     append @retv, $merged if $merged;
                 }

@@ -40,6 +40,8 @@ my $manteca = MinG::LItem.new( features => ($d), phon => "manteca");
 
 my $g = MinG::Grammar.new(lex => ($juan, $come, $escupe, $pan, $manteca, $force), start_cat => $c);
 
+$g.litem_tree.compile_tex('notcool.tex');
+
 parse_and_spit($g, "juan escupe pan");
 
 my $parser = MinG::S13::Parser.new();
