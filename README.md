@@ -6,11 +6,13 @@ A small module for working with Stabler's Minimalist Grammars in Perl6.
 STRUCTURE
 =========
 
-As of now there are two (sub)modules: MinG and MinG::S13.
+As of now there are three (sub)modules: MinG, MinG::S13 and MinG::From::Text.
 
 In MinG, you'll find the necessary classes and subroutines for creating descriptions of Minimalist Grammars. It's not of much use by itself unless you're planning to implement your own parser/etc. and want to save yourself the time of having to define classes and useful functions.
 
 In MinG::S13, you'll find Stabler's (2013) "Two models of minimalist, incremental syntactic analysis" parser. Currently, this parser analyses all possibilities, while Stabler's parser discards low-probability derivations.
+
+Finally, in MinG::From::Text you'll find a parser that creates MinG::Grammar-s out of text descriptions of MGs.
 
 More documentation can be found in HTML files inside the doc/ directory.
 
@@ -21,16 +23,18 @@ If you have perl6 and panda or zef, the following should suffice:
 
         git clone https://github.com/IanTayler/MinG.git
         cd MinG
-        panda install .
+        zef install .
 
 If you don't, the easiest is probably to install rakudobrew <https://github.com/tadzik/rakudobrew> and then run:
 
-        rakudobrew build moar
-        rakudobrew build panda
+        rakudobrew build moar --gen-moar --gen-nqp --backend=moar
+        rakudobrew build zef
 
 and you should be ready to clone and install this repository.
 
-The module is currently ready for distribution, so I might add it to the Perl6 environment so that you can install it with "panda install MinG".
+The best option is probably to install Rakudo Star <http://rakudo.org/how-to-get-rakudo/> which comes with zef and some common modules. There's lots of tutorials about how to get perl6. Follow one of them and make sure you install zef (or panda).
+
+The module is currently ready for distribution, so I might add it to the Perl6 environment so that you can install it with "zef install MinG".
 
 CURRENTLY
 =========
