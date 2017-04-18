@@ -33,7 +33,7 @@ my $IS_NOT_FEAT = -> Node $x { not ($x.feat_node) };
 
 enum ParseWay < PROCEDURAL PARALLEL >;
 
-constant $BASE_E_CATS = 1;
+constant $BASE_E_CATS = 5;
 constant $MULTIP_E_CATS = 1;
 
 #################################################################################
@@ -167,6 +167,7 @@ class QueueItem {
     }
 class Queue {
     has QueueItem @.items;
+    has @!deletions;
 
     #|{
         With this method, we find out the index of the highest-priority item. Linear time.
@@ -203,7 +204,7 @@ class Queue {
     method max() {
         my Int $temp = self.ind_max;
         return @.items[$temp] if $temp;
-        return Nil; # This is like dropping a derivational-time-bomb.
+        return Nil; # This is like dropping a derivational time-bomb.
                     # Preminger would be mad.
     }
 
@@ -212,16 +213,26 @@ class Queue {
         }
     method pop() {
         my Int $temp = self.ind_max;
-        return @.items[$temp]:delete if ($temp);
+        if $temp {
+            push @!deletions, $temp;
+            return @.items[$temp]:delete;
+        }
         @.items = [];
         return Nil;
     }
 
     #|{
-        Method that adds an element to the Queue. This runs in constant time.
+        Method that adds an element to the Queue.
+
+        This runs in constant time. If there are previously deleted elements, it fills those positions instead of pushing, making sure our queue length doesn't get too far away from the real length.
         }
     method push(QueueItem $new) {
-        push @.items, $new;
+        if @!deletions.elems == 0 {
+            push @.items, $new;
+        } else {
+            my Int $deleted_location = @!deletions.pop;
+            @.items[$deleted_location] = $new;
+        }
     }
 
     #|{

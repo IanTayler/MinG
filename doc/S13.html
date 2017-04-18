@@ -87,7 +87,7 @@ Method that deletes the highest-priority item and returns it. Linear time.
 </article>
 <article>
 <code class="pod-code-inline">push:(Queue $: QueueItem $new, *%_)</code>:
-Method that adds an element to the Queue. This runs in constant time.
+Method that adds an element to the Queue. This runs in constant time. If there are previously deleted elements, it fills those positions instead of pushing, making sure our queue length doesn&#39;t get too far away from the real length.
 </article>
 <article>
 <code class="pod-code-inline">elems:(Queue $: *%_ --&gt; Int)</code>:
