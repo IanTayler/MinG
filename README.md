@@ -45,10 +45,12 @@ CURRENTLY
 
   * Has a merge-only working parser for MGs! (MinG::S13::Parser or MinG::S13.parse_and_spit())
 
+  * Has a parser that reads grammars from a file! (MinG::From::Text)
+
 TODO
 ====
 
-  * Make a parser to read grammars from a file. (Will bump to 0.5.0)
+  * Fix issues #1, #2 (Will bump to 0.6.0 directly)
 
   * Finish the parser so that it includes move-cases. (Will bump to 1.0.0)
 

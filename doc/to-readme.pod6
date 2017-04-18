@@ -37,9 +37,10 @@ The module is currently ready for distribution, so I might add it to the Perl6 e
 =item1 Has lexical trees for Stabler's (2013) parsing method (MinG::Grammar.litem_tree).
 =item1 Automatically generates LaTeX/qtree code for trees. (Node.qtree inside MinG)
 =item1 Has a merge-only working parser for MGs! (MinG::S13::Parser or MinG::S13.parse_and_spit())
+=item1 Has a parser that reads grammars from a file! (MinG::From::Text)
 
 =head1 TODO
-=item1 Make a parser to read grammars from a file. (Will bump to 0.5.0)
+=item1 Fix issues #1, #2 (Will bump to 0.6.0 directly)
 =item1 Finish the parser so that it includes move-cases. (Will bump to 1.0.0)
 =item1 Allow some useful expansions of MGs.
 =item1 Make the parser more efficient by adding probabilistic rule-following.
