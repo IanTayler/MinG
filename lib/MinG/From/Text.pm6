@@ -41,7 +41,7 @@ class ConverterActions {
     }
 
     method lex ($/) {
-        make MinG::LItem.new( phon => $<word>.Str, features => $<featlist>.made);
+        make MinG::LItem.new( phon => $<word>.Str.lc, features => $<featlist>.made);
     }
 
     method featlist ($/) {
