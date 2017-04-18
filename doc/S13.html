@@ -34,7 +34,7 @@
 <caption><h2 id="TOC_Title">Table of Contents</h2></caption>
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
   <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS]">INTERNAL CLASSES AND FUNCTIONS]</a></td></tr>
-                              <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
+                               <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
            
 </table>
 </nav>
@@ -94,6 +94,10 @@ Method that adds an element to the Queue. This runs in constant time.
 Method that gets the amount of elements in the Queue. It&#39;s not reliable because we keep deleted items in the @.items array. We get the right result when there&#39;s 0 elements because Perl6 deletes pseudo-deleted elements from the end of the array (even if they were pseudo-deleted a long time ago). Note: I guess this could easily break with future implementations of Perl6.
 </article>
 <article>
+<code class="pod-code-inline">empty:(Queue $: *%_ --&gt; Bool)</code>:
+Method that returns True if the Queue is empty. This is done for safety, as elems isn&#39;t very reliable. It runs in lineal time, though, so I&#39;m not using it unless I really have to.
+</article>
+<article>
 <code class="pod-code-inline">deep_clone:(Queue $: *%_ --&gt; Queue)</code>:
 Method that (partially) deep-clones a Queue. Some parts don&#39;t need to be deep-cloned, so we get references to that.
 </article>
@@ -143,7 +147,7 @@ Method that beautifies a derivation. Mostly used for debugging purposes.
 Method that gets a nice string representation of the @!devq.
 </article>
 <article>
-<code class="pod-code-inline">parallel_run:(MinG::S13::Parser $: *%_)</code>:
+<code class="pod-code-inline">parallel_run:(MinG::S13::Parser $: *%_ --&gt; Bool)</code>:
 Method that runs one iteration of the parsing loop, running one step of each derivation in parallel. Gets all possible derivations.
 </article>
 <article>

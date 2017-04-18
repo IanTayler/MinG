@@ -101,32 +101,12 @@ grammar Do {
 #        TEST        #
 ######################
 sub MAIN() {
-    parse_and_spit(grammar_from_text(Q:to<VERYEND>
-        START=V
-        comio       :: =D =D V
-        el          :: =N D
-        gran        :: =N N
-        muchacho    :: N
-        muchacha    :: N
-        la          :: =N D
-        Juan        :: D
-        mermelada   :: N
-        VERYEND
-        ), "el gran muchacho comio la mermelada");
-    say grammar_from_text(Q:to<VERYEND>
-        START=V
-        comio :: =D =D V
-        el :: =N D
-        abada :: V
-        muchacho :: N
-        VERYEND
-        ).litem_tree.qtree;
     my $g = grammar_from_file($ESPA0);
     my $p = MinG::S13::Parser.new();
     $p.init($g);
-    my @frases = ["juan saludó a maría", "juan dijo que maría saludó a pedro", "pedro era viejo", "pedro dijo que maría pensaba que juan era viejo", "el sordo pensaba que pedro saludó a maría", "maría saludó al sordo", "a maría saludó juan"];
+    my @frases = ["juan saludó a maría", "juan dijo que maría saludó a pedro", "pedro era viejo", "pedro dijo que maría pensaba que juan era viejo", "el sordo pensaba que pedro saludó a maría", "maría saludó al sordo", "a maría saludó juan", "maría pensaba que pedro saludó al sordo de juan", "maría dijo que saludó a pedro", "pedro fue a la casa de juan"];
     for @frases -> $frase {
-        $p.parse_str($frase);
+        $p.parse_str($frase, PARALLEL);
     }
 
 }
