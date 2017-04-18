@@ -33,7 +33,7 @@ my $IS_NOT_FEAT = -> Node $x { not ($x.feat_node) };
 
 enum ParseWay < PROCEDURAL PARALLEL >;
 
-constant $BASE_E_CATS = 5;
+constant $BASE_E_CATS = 1;
 constant $MULTIP_E_CATS = 1;
 
 #################################################################################

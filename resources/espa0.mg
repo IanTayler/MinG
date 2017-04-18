@@ -1,5 +1,6 @@
 START=I
 :: =V =D I
+:: =V I
 juan :: D
 pedro :: D
 saludó :: =AD V
@@ -7,7 +8,6 @@ a :: =D AD
 maría :: D
 dijo :: =S V
 que :: =I S
-que :: =V S
 era :: =A V
 viejo :: A
 pensaba :: =S V
