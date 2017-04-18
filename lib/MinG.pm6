@@ -5,6 +5,11 @@ use strict;
 MinG -- A small module for describing MGs in Perl6.
 =end pod
 
+#############
+# CONSTANTS #
+#############
+constant $ESPA0 = %?RESOURCES{"espa0.mg"};
+
 class MinG::Feature { ... }
 
 #################################################

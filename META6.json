@@ -1,7 +1,7 @@
 {
     "perl" : "6.c",
     "name" : "MinG",
-    "version" : "0.4.6",
+    "version" : "0.5.2",
     "description" : "A small module for working with Stabler's Minimalist Grammars in Perl6.",
     "authors" : "Ian G. Tayler",
     "provides" : {
@@ -10,6 +10,6 @@
         "MinG::From::Text" : "lib/MinG/From/Text.pm6"
     },
     "depends" : [ ],
-    "resources" : ["template.tex"],
+    "resources" : ["template.tex", "espa0.mg"],
     "source-url" : "git:github.com/IanTayler/MinG.git"
 }

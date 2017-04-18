@@ -6,13 +6,13 @@ use MinG::S13;
     Grammar class that parses a file describing an MG lexicon.
     }
 grammar MinG::From::Text::Grammar {
-    token TOP {<header>\h*\n<lexlist>}
+    token TOP {<header>\h*\v<lexlist>}
 
     rule header {\w* '=' <cat>}
 
     token cat {\w+}
 
-    rule lexlist {<lex1=.lex>\h*\n<lexlist>|<lex2=.lex> }
+    rule lexlist {<lex1=.lex>\h*\v<lexlist>|<lex2=.lex> }
 
     rule lex {<word> '::' <featlist>}
 
@@ -82,6 +82,12 @@ sub grammar_from_text(Str $s) of MinG::Grammar is export {
     return MinG::From::Text::Grammar.parse($s, actions => ConverterActions).made;
 }
 
+sub grammar_from_file($f) of MinG::Grammar is export {
+    my $contents = slurp $f;
+    # say MinG::From::Text::Grammar.parse($contents);
+    return grammar_from_text($contents);
+}
+
 grammar Do {
     token TOP { <header>' '*\n<lexlist> }
 
@@ -107,12 +113,20 @@ sub MAIN() {
         mermelada   :: N
         VERYEND
         ), "el gran muchacho comio la mermelada");
-    parse_and_spit(grammar_from_text(Q:to<VERYEND>
+    say grammar_from_text(Q:to<VERYEND>
         START=V
         comio :: =D =D V
         el :: =N D
         abada :: V
         muchacho :: N
         VERYEND
-        ), "abada");
+        ).litem_tree.qtree;
+    my $g = grammar_from_file($ESPA0);
+    my $p = MinG::S13::Parser.new();
+    $p.init($g);
+    my @frases = ["juan saludó a maría", "juan dijo que maría saludó a pedro", "pedro era viejo", "pedro dijo que maría pensaba que juan era viejo", "el sordo pensaba que pedro saludó a maría", "maría saludó al sordo", "a maría saludó juan"];
+    for @frases -> $frase {
+        $p.parse_str($frase);
+    }
+
 }

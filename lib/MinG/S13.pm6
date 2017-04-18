@@ -33,6 +33,9 @@ my $IS_NOT_FEAT = -> Node $x { not ($x.feat_node) };
 
 enum ParseWay < PROCEDURAL PARALLEL >;
 
+constant $BASE_E_CATS = 10;
+constant $MULTIP_E_CATS = 1;
+
 #################################################################################
 # Implemented the 'current' lexical tree as a global variable.
 # This is the ugliest thing in the implementation. Should I at one point fix it?
@@ -69,22 +72,24 @@ class Priority {
         A method that compares this object's priority with another Priority object's priority and returns true if this one's is smaller.
         }
     method bigger_than(Priority $other) of Bool {
-        if self.length > $other.length {
-            return False;
-        } elsif $other.length > self.length {
-            return True;
-        } else {
-            loop (my $i = 0; $i < self.length; $i++) {
-                if @.pty[$i] > $other.pty[0] {
-                    return False;
-                } elsif @.pty[$i] < $other.pty[0] {
-                    return True;
-                }
-            }
-        }
+        # Lexicographical order means longer priorities are less prioritish.
+        # Or doesn't it? Testing.
+        ##############################
+        # else {
+        # loop (my $i = 0; ($i < self.length) && ($i < $other.length); $i++) {
+        #     if @.pty[$i] > $other.pty[$i] {
+        #         return False;
+        #     } elsif @.pty[$i] < $other.pty[$i] {
+        #         return True;
+        #     }
+        # }
+        # }
         # If we got here, they both have the same priority.
         # I think this shouldn't happen, but I don't see why it would be a problem.
-        # So, we're just throwing True in this case, and hope for the best.
+        # So, we're just throwing True ##(Now False, just in case)## in this case,
+        # and hope for the best.
+        my $pretv = self.pty cmp $other.pty;
+        return False if $pretv eqv More;
         return True;
     }
 
@@ -92,7 +97,7 @@ class Priority {
         Method that appends a number at the end of the priority. It returns a new Priority instead of changing itself automatically. Less efficient, but more useful for our purposes.
         }
     method add_p(Int $n) of Priority {
-        my @new_pty = @.pty;
+        my @new_pty = @.pty; # Int-s are immutable, so this should be fine.
         @new_pty.push($n);
         return Priority.new(pty => @new_pty);
     }
@@ -198,7 +203,8 @@ class Queue {
     method max() {
         my Int $temp = self.ind_max;
         return @.items[$temp] if $temp;
-        return Nil;
+        return Nil; # This is like dropping a derivational-time-bomb.
+                    # Preminger would be mad.
     }
 
     #|{
@@ -219,10 +225,25 @@ class Queue {
     }
 
     #|{
-        Method that gets the amount of elements in the Queue. It's not reliable because we keep deleted items in the @.items array. We get the right result when there's 0 elements because Perl6 deletes pseudo-deleted elements from the end of the array (even if they were pseudo-deleted a long time ago). Note: I guess this could easily break with future implementations of Perl6.
+        Method that gets the amount of elements in the Queue.
+
+        It's not reliable because we keep deleted items in the @.items array. We get the right result when there's 0 elements because Perl6 deletes pseudo-deleted elements from the end of the array (even if they were pseudo-deleted a long time ago). Note: I guess this could easily break with future implementations of Perl6.
         }
     method elems() of Int {
         return @.items.elems;
+    }
+
+    #|{
+        Method that returns True if the Queue is empty.
+
+        This is done for safety, as elems isn't very reliable. It runs in lineal time, though, so I'm not using it unless I really have to.
+        }
+    method empty() of Bool {
+        return True if @.items.elems == 0;
+        for @.items -> $item {
+            return False if $item;
+        }
+        return True;
     }
 
     #|{
@@ -360,8 +381,8 @@ class Derivation {
         my $this_prediction = $.q.pop();
         my @retv;
         return @retv unless $this_prediction;
-
-        debug("We got here. So prediction not empty.");
+        # Heuristic. We won't allow too many empty categories!
+        return @retv if $.q.elems > ((@.input.elems + $BASE_E_CATS ) * $MULTIP_E_CATS);
 
         # SCAN CONSIDERED. NEEDS MERGE1-4 and MOVE1-2.
         if $this_prediction.node.has_child(@.input[0]) -> $child_place {
@@ -457,18 +478,20 @@ class MinG::S13::Parser {
     #|{
         Method that runs one iteration of the parsing loop, running one step of each derivation in parallel. Gets all possible derivations.
         }
-    method parallel_run() {
+    method parallel_run() of Bool {
         # Notice we're using Promises.
         debug("Run number: $run_number");
         debug("\tInitial \@!devq: ");
         debug(self.devq_to_str);
 
+        my $finished = False;
+
         my @promises;
         for @!devq -> $dev {
             if not($dev.still_going()) {
                 push @.results, $dev.structure;
+                $finished = True;
             } else {
-                debug("One element of the devq: "); debug($dev.to_str);
                 push @promises, Promise.start({ $dev.exps() });
             }
         }
@@ -481,6 +504,8 @@ class MinG::S13::Parser {
         debug("\tNew queue: ");
         debug(self.devq_to_str);
         $run_number++ if $DEBUG;
+
+        return $finished;
     }
 
     #|{
@@ -505,7 +530,13 @@ class MinG::S13::Parser {
         Method that runs the main parsing loop using parallel_run. Gets all possible derivations.
         }
     method parallel_parse() of Bool {
+        # Clean debugging symbols:
+        $run_number = 1 if $DEBUG;
         while @!devq.elems > 0 {
+            # This only gets the first derivation
+            # last if self.parallel_run();
+
+            # While this gets all of them.
             self.parallel_run();
         }
         if @.results.elems == 0 {
@@ -519,15 +550,17 @@ class MinG::S13::Parser {
         Method that runs the main parseing loop using procedural_run. Stops after it finds the first derivation.
         }
     method procedural_parse() of Bool {
+        # Clean debugging symbols:
+        $run_number = 1 if $DEBUG;
         my $poss_result;
         while @!devq.elems > 0 and @!devq[@!devq.end].still_going {
             $poss_result = self.procedural_run();
         }
         if @!devq.elems == 0 {
+            return False;
+        } else {
             @!results.push($poss_result);
             return True;
-        } else {
-            return False;
         }
     }
 
@@ -582,9 +615,6 @@ class MinG::S13::Parser {
     method setup(MinG::Grammar $g, Str $inp) {
         # Clean previous results:
         @.results = ();
-
-        # Clean debugging symbols:
-        $run_number = 1 if $DEBUG;
 
         my @proper_input = $inp.lc.split(' ');
 
@@ -687,7 +717,7 @@ sub MAIN() {
 
     # my @frases = ["Juan come pan", "manteca escupe Juan", "come escupe Juan", "Juan", "come", "Pan Come Manteca", "juan come mucho pan"];
 
-    my @frases = ["mucho juan come mucho mucho juan", "imasentence", "imasentence y juan come juan", "juan come juan y imasentence", "juan come mucho juan", "juan come juan", "hay juan", "juan hay"];
+    my @frases = ["juan come juan y imasentence", "hay juan", "juan hay", "mucho mucho juan come mucho pan y juan come mucho pan", "imasentence y imasentence y imasentence"];
 
     $parser.init($g);
 
