@@ -136,6 +136,25 @@ class QueueItem {
         return True unless $other;
         return self.priority.bigger_than($other.priority);
     }
+
+    #|{
+        Method that gets a QueueItem in string for to print while debugging.
+        }
+    method to_str() of Str {
+        my @pretv = "\tQueueItem:";
+        push @pretv, "\t\tPriority:\n\t\t{$.priority.pty.join()}";
+        push @pretv, "\t\tMovers:\n\t\t{@.movers}"; # Let's improve this later.
+        push @pretv, "\t\tNode:\n\t\t{$.node.qtree}";
+        return @pretv.join("\n");
+    }
+
+    #|{
+        Method that "deep-clones" a QueueItem. Actually, only @.movers needs to be deep-cloned (and that means simply copying the array. It doesn't get deeper than that), as the rest of the attributes don't get modified normally.
+        }
+    method deep_clone() of QueueItem {
+        my Mover @newmovers = @.movers; # I assume arrays don't copy references.
+        return QueueItem.new(priority => self.priority, movers => @newmovers, node => $.node);
+    }
 }
 
 #|{
@@ -151,19 +170,19 @@ class Queue {
         if @.items.elems == 0 {
             # It may or may not be better to die here. I'm letting it be for now.
             # Actually, nope. Dying here.
-            die "Hey, this queue is empty!!!";
+            return Nil;
         }
 
         # The start may be empty without the whole thing being empty, so we need
         # to find the first non-empty place
-        my uint16 $first_place = 0;
+        my Int $first_place = 0 but True;
         # This is supposed to be safe because we already checked that the array
         # isn't empty. We may be in for a surprise in a few months, though.
         loop (; not(@.items[$first_place]); $first_place++){};
         my $highest = @.items[$first_place];
 
         my $index = $first_place;
-        loop (my uint16 $i = $first_place; $i < @.items.elems; $i++) {
+        loop (my $i = $first_place; $i < @.items.elems; $i++) {
             next unless @.items[$i];
             if @.items[$i].bigger_than($highest) {
                 $highest = @.items[$i];
@@ -177,14 +196,19 @@ class Queue {
         Method that gets a reference to the highest-priority item. Linear time.
         }
     method max() {
-        return @.items[self.ind_max];
+        my Int $temp = self.ind_max;
+        return @.items[$temp] if $temp;
+        return Nil;
     }
 
     #|{
         Method that deletes the highest-priority item and returns it. Linear time.
         }
     method pop() {
-        return @.items[self.ind_max]:delete;
+        my Int $temp = self.ind_max;
+        return @.items[$temp]:delete if ($temp);
+        @.items = [];
+        return Nil;
     }
 
     #|{
@@ -200,6 +224,17 @@ class Queue {
     method elems() of Int {
         return @.items.elems;
     }
+
+    #|{
+        Method that (partially) deep-clones a Queue. Some parts don't need to be deep-cloned, so we get references to that.
+        }
+    method deep_clone() of Queue {
+        my QueueItem @newitems;
+        for @.items -> $item {
+            push @newitems, $item.deep_clone if $item;
+        }
+        return Queue.new(items => @newitems);
+    }
 }
 
 #|{
@@ -210,11 +245,11 @@ class DerivTree is Node {
     # weird and useless derivation chain. Consider it a placeholder for future
     # true derivations.
     method add_to_end(Node $n) {
-        my $lastman = self;
-        while $lastman.children.elems > 0 {
-            $lastman = $lastman.children[0];
-        }
-        $lastman.children.push($n);
+        # my $lastman = self;
+        # while $lastman.children.elems > 0 {
+        #     $lastman = $lastman.children[0];
+        # }
+        # $lastman.children.push($n);
     }
 };
 
@@ -242,7 +277,7 @@ class Derivation {
         my $start_place = 1;
         $start_place = 0 if $leave.label eq "";
 
-        my $struc = $.structure;
+        my $struc = $.structure.item;
         $struc.add_to_end((DerivTree.new(label => "{$leave.label}",\
                                              children => ())));
         return Derivation.new(input => @.input[$start_place..*], q => $.q, structure => $struc);
@@ -265,9 +300,9 @@ class Derivation {
                                    movers => $pred.movers,\
                                    node => $selected);
 
-        my $nq = $.q;
+        my $nq = $.q.deep_clone;
         $nq.push($f_item); $nq.push($s_item);
-        my $struc = $.structure;
+        my $struc = $.structure.item;
         $struc.add_to_end(DerivTree.new(label => "merge1({$selector.str_label}, {$selected.str_label})",\
                                              children => ()));
 
@@ -286,10 +321,12 @@ class Derivation {
                                    movers => (),\
                                    node => $selected);
 
-        my $nq = $.q;
+        my $nq = $.q.deep_clone;
         $nq.push($f_item); $nq.push($s_item);
 
-        my $struc = $.structure;
+        debug("THIS SHOULD BE FALSE: {($nq eqv $.q).perl}");
+
+        my $struc = $.structure.clone;
         $struc.add_to_end(DerivTree.new(label => "merge2({$selector.str_label}, {$selected.str_label})",\
                                              children => ()));
 
@@ -367,6 +404,19 @@ SEL_LOOP:   for @selector_ch -> $selector {
         }
         return @retv;
     }
+
+    #|{
+        Method that beautifies a derivation. Mostly used for debugging purposes.
+        }
+    method to_str() of Str {
+        my Str @pretv = ["INPUT:\n\t{@.input.gist}"];
+        push @pretv, "QUEUE:";
+        for $.q.items -> $qi {
+            push @pretv, $qi.to_str if $qi;
+        }
+        push @pretv, "STRUCTURE:\n\t{$.structure.qtree}";
+        return @pretv.join("\n");
+    }
 }
 
 #####################################################
@@ -384,8 +434,24 @@ class MinG::S13::Parser {
     # Trees of successful derivations!
     has DerivTree @.results;
 
+    # This is temporal. devq is not meant to be public.
     method devq() {
         return @!devq;
+    }
+
+    #|{
+        Method that gets a nice string representation of the @!devq.
+        }
+    method devq_to_str() {
+        my @pretv = "###############\nDERIVATION QUEUE:";
+        my $i = 0;
+        for @!devq -> $dev {
+            push @pretv, "DERIVATION \#$i";
+            $i++;
+            push @pretv, $dev.to_str;
+        }
+        push @pretv, "END DEVQ\n###############";
+        return @pretv.join("\n");
     }
     #|{
         Method that runs one iteration of the parsing loop, running one step of each derivation in parallel. Gets all possible derivations.
@@ -394,14 +460,14 @@ class MinG::S13::Parser {
         # Notice we're using Promises.
         debug("Run number: $run_number");
         debug("\tInitial \@!devq: ");
-        { print "\t\t"; say @!devq; say "\n" } if $DEBUG;
+        debug(self.devq_to_str);
 
         my @promises;
         for @!devq -> $dev {
             if not($dev.still_going()) {
                 push @.results, $dev.structure;
             } else {
-                debug("One element of the devq: "); debug($dev);
+                debug("One element of the devq: "); debug($dev.to_str);
                 push @promises, Promise.start({ $dev.exps() });
             }
         }
@@ -410,9 +476,9 @@ class MinG::S13::Parser {
             append @newdevq, $prom.result;
         }
 
-        debug("\tNew queue: ");
-        { print "\t\t"; say @newdevq; say "\n" } if $DEBUG;
         @!devq = @newdevq;
+        debug("\tNew queue: ");
+        debug(self.devq_to_str);
         $run_number++ if $DEBUG;
     }
 
@@ -548,28 +614,41 @@ sub MAIN() {
 
     my @things = ["", "a", "b", "b a", "a b a", "abab"];
 
-    for @things -> $thing {
-        say "\n\tPROCEDURAL: ";
-        $parser.parse_me($g, $thing, PROCEDURAL);
-
-        say "\n\tPARALLEL: ";
-        $parser.parse_me($g, $thing, PARALLEL);
-    }
+    # for @things -> $thing {
+    #     say "\n\tPROCEDURAL: ";
+    #     $parser.parse_me($g, $thing, PROCEDURAL);
+    #
+    #     say "\n\tPARALLEL: ";
+    #     $parser.parse_me($g, $thing, PARALLEL);
+    # }
 
     my $c = feature_from_str("C"); my $selv = feature_from_str("=V"); my $v = feature_from_str("V"); my $d = feature_from_str("D"); my $seld = feature_from_str("=D");
 
-    my $force = MinG::LItem.new( features => ($selv, $c), phon => ""); my $juan = MinG::LItem.new( features => ($d), phon => "juan"); my $come = MinG::LItem.new( features => ($seld, $seld, $v), phon => "come"); my $escupe = MinG::LItem.new( features => ($seld, $seld, $v), phon => "escupe"); my $pan = MinG::LItem.new( features => ($d), phon => "pan"); my $manteca = MinG::LItem.new( features => ($d), phon => "manteca");
+    my $force = MinG::LItem.new( features => ($selv, $c), phon => "");
+    my $juan = MinG::LItem.new( features => ($d), phon => "juan");
+    my $come = MinG::LItem.new( features => ($seld, $seld, $v), phon => "come");
+    my $hay = MinG::LItem.new( features => ($seld, $v), phon => "hay");
+    my $escupe = MinG::LItem.new( features => ($seld, $seld, $v), phon => "escupe");
+    my $pan = MinG::LItem.new( features => ($d), phon => "pan");
+    my $manteca = MinG::LItem.new( features => ($d), phon => "manteca");
+    my $y = MinG::LItem.new( features => ($selv, $selv, $v), phon => "y");
 
-    $g = MinG::Grammar.new(lex => ($juan, $come, $escupe, $pan, $manteca, $force), start_cat => $c);
+    my $mucho = MinG::LItem.new( features => ($seld, $d), phon => "mucho");
 
-    my @frases = ["Juan come pan", "manteca escupe Juan", "come escupe Juan", "Juan", "come", "Pan Come Manteca"];
+    my $sentence = MinG::LItem.new( features => ($v), phon => "imasentence");
+
+    $g = MinG::Grammar.new(lex => ($come, $sentence, $juan, $hay, $mucho, $pan, $y), start_cat => $v);
+
+    # my @frases = ["Juan come pan", "manteca escupe Juan", "come escupe Juan", "Juan", "come", "Pan Come Manteca", "juan come mucho pan"];
+
+    my @frases = ["mucho juan come mucho mucho juan", "imasentence", "juan come mucho juan", "juan come juan", "hay juan", "juan hay"];
 
     for @frases -> $frase {
         #say "\n\tPROCEDURAL: ";
         #$parser.parse_me($g, $frase, PROCEDURAL);
 
         say "\n\tPARALLEL: ";
-        $parser.parse_me($g, $frase);
+        $parser.parse_me($g, $frase, PARALLEL);
     }
 
 }

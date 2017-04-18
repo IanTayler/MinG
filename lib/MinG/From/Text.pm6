@@ -96,12 +96,12 @@ sub MAIN() {
         START=V
         comio       :: =D =D V
         el          :: =N D
+        gran        :: =N N
         muchacho    :: N
         muchacha    :: N
         la          :: =N D
         Juan        :: D
         mermelada   :: N
-        y :: =V =V V
         VERYEND
         ), "el gran muchacho comio la mermelada");
     parse_and_spit(grammar_from_text(Q:to<VERYEND>

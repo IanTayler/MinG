@@ -34,8 +34,8 @@
 <caption><h2 id="TOC_Title">Table of Contents</h2></caption>
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
   <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS]">INTERNAL CLASSES AND FUNCTIONS]</a></td></tr>
-                          <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
-        
+                              <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
+         
 </table>
 </nav>
 
@@ -65,6 +65,14 @@ Function used to compare two priorities. Uses Priority.bigger_than method intern
 <code class="pod-code-inline">bigger_than:(QueueItem $: QueueItem $other, *%_)</code>:
 This method is a wrapper around Priority.bigger_than so that it can be called more easily from a Queue object.
 </article>
+<article>
+<code class="pod-code-inline">to_str:(QueueItem $: *%_ --&gt; Str)</code>:
+Method that gets a QueueItem in string for to print while debugging.
+</article>
+<article>
+<code class="pod-code-inline">deep_clone:(QueueItem $: *%_ --&gt; QueueItem)</code>:
+Method that &quot;deep-clones&quot; a QueueItem. Actually, only @.movers needs to be deep-cloned (and that means simply copying the array. It doesn&#39;t get deeper than that), as the rest of the attributes don&#39;t get modified normally.
+</article>
 <h1>Queue: The Queue of category predictions.</h1><article>
 <code class="pod-code-inline">ind_max:(Queue $: *%_ --&gt; Int)</code>:
 With this method, we find out the index of the highest-priority item. Linear time.
@@ -84,6 +92,10 @@ Method that adds an element to the Queue. This runs in constant time.
 <article>
 <code class="pod-code-inline">elems:(Queue $: *%_ --&gt; Int)</code>:
 Method that gets the amount of elements in the Queue. It&#39;s not reliable because we keep deleted items in the @.items array. We get the right result when there&#39;s 0 elements because Perl6 deletes pseudo-deleted elements from the end of the array (even if they were pseudo-deleted a long time ago). Note: I guess this could easily break with future implementations of Perl6.
+</article>
+<article>
+<code class="pod-code-inline">deep_clone:(Queue $: *%_ --&gt; Queue)</code>:
+Method that (partially) deep-clones a Queue. Some parts don&#39;t need to be deep-cloned, so we get references to that.
 </article>
 <h1>DerivTree: Class that represents derivation trees. As of now, they&#39;re just Nodes.</h1><h1>Derivation: Class that represents one derivation.</h1><article>
 <code class="pod-code-inline">still_going:(Derivation $: *%_ --&gt; Bool)</code>:
@@ -121,8 +133,16 @@ See Stabler (2013)
 <code class="pod-code-inline">exps:(Derivation $: *%_ --&gt; Array)</code>:
 Method that gets the expansions to be had in the next step. Check the code&#39;s comments for more details.
 </article>
+<article>
+<code class="pod-code-inline">to_str:(Derivation $: *%_ --&gt; Str)</code>:
+Method that beautifies a derivation. Mostly used for debugging purposes.
+</article>
 <h1 id="EXPORTED_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">EXPORTED CLASSES AND FUNCTIONS</a></h1>
 <h1>MinG::S13::Parser: Class that implements the parser per se. This is not where the magic happens, but it is where most of the external API is defined.</h1><article>
+<code class="pod-code-inline">devq_to_str:(MinG::S13::Parser $: *%_)</code>:
+Method that gets a nice string representation of the @!devq.
+</article>
+<article>
 <code class="pod-code-inline">parallel_run:(MinG::S13::Parser $: *%_)</code>:
 Method that runs one iteration of the parsing loop, running one step of each derivation in parallel. Gets all possible derivations.
 </article>
