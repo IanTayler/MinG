@@ -433,6 +433,7 @@ class MinG::S13::Parser {
     has Derivation @!devq;
     # Trees of successful derivations!
     has DerivTree @.results;
+    has Node $.start_cat;
 
     # This is temporal. devq is not meant to be public.
     method devq() {
@@ -531,6 +532,51 @@ class MinG::S13::Parser {
     }
 
     #|{
+        Method that initialises that parser to later parse several strings. Should be used instead of Parser.setup when a single grammar is going to be used several times.
+        }
+    method init(MinG::Grammar $g) {
+        $s13_global_lexical_tree = $g.litem_tree();
+        my $start_ind = $s13_global_lexical_tree.has_child($g.start_cat);
+        say "bad start symbol for the grammar!" without $start_ind;
+        $!start_cat = $s13_global_lexical_tree.children[$start_ind];
+    }
+
+    #|{
+        Method that parses a single string based on the grammar that was initialised using Parser.init()
+        }
+    method parse_str(Str $inp, ParseWay $do = PARALLEL) {
+        @!results = ();
+        my @proper_input = $inp.split(' ');
+        my $que = Queue.new(items => (QueueItem.new(priority => Priority.new(pty => (0)),\
+                                                    movers => (),\
+                                                    node => $.start_cat,\
+                                                    )));
+        my $start_dev = Derivation.new(input => @proper_input,\
+                                       q => $que,\
+                                       structure => DerivTree.new(label => "OK", children => ())\
+                                       );
+        push @!devq, $start_dev;
+
+        say "Parsing $inp.";
+        debug("\tThis is the input:\n\t\t{@.devq[0].input}\n\tLength:\n\t\t{@.devq[0].input.elems}");
+        if $do == PROCEDURAL {
+            if self.procedural_parse() {
+                say "\t{@.results[0].qtree}";
+            } else {
+                say "\tThe string you passed is not in the language.";
+            }
+        } else {
+            if self.parallel_parse() {
+                for @.results -> $res {
+                    say "\t{$res.qtree}";
+                }
+            } else {
+                say "\tThe string you passed is not in the language.";
+            }
+        }
+    }
+
+    #|{
         Method that sets up a parser with a certain grammar and a certain input (taken as a string for convenience, converted to lower case and an array as needed) and creates the first derivation.
         }
     method setup(MinG::Grammar $g, Str $inp) {
@@ -557,7 +603,7 @@ class MinG::S13::Parser {
                                                     )));
         my $start_dev = Derivation.new(input => @proper_input,\
                                        q => $que,\
-                                       structure => DerivTree.new(label => "ROOT", children => ())\
+                                       structure => DerivTree.new(label => "OK", children => ())\
                                        );
         push @!devq, $start_dev;
     }
@@ -641,14 +687,16 @@ sub MAIN() {
 
     # my @frases = ["Juan come pan", "manteca escupe Juan", "come escupe Juan", "Juan", "come", "Pan Come Manteca", "juan come mucho pan"];
 
-    my @frases = ["mucho juan come mucho mucho juan", "imasentence", "juan come mucho juan", "juan come juan", "hay juan", "juan hay"];
+    my @frases = ["mucho juan come mucho mucho juan", "imasentence", "imasentence y juan come juan", "juan come juan y imasentence", "juan come mucho juan", "juan come juan", "hay juan", "juan hay"];
+
+    $parser.init($g);
 
     for @frases -> $frase {
         #say "\n\tPROCEDURAL: ";
         #$parser.parse_me($g, $frase, PROCEDURAL);
 
         say "\n\tPARALLEL: ";
-        $parser.parse_me($g, $frase, PARALLEL);
+        $parser.parse_str($frase);
     }
 
 }

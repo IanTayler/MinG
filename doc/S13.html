@@ -35,7 +35,7 @@
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
   <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS]">INTERNAL CLASSES AND FUNCTIONS]</a></td></tr>
                               <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
-         
+           
 </table>
 </nav>
 
@@ -157,6 +157,14 @@ Method that runs the main parsing loop using parallel_run. Gets all possible der
 <article>
 <code class="pod-code-inline">procedural_parse:(MinG::S13::Parser $: *%_ --&gt; Bool)</code>:
 Method that runs the main parseing loop using procedural_run. Stops after it finds the first derivation.
+</article>
+<article>
+<code class="pod-code-inline">init:(MinG::S13::Parser $: MinG::Grammar $g, *%_)</code>:
+Method that initialises that parser to later parse several strings. Should be used instead of Parser.setup when a single grammar is going to be used several times.
+</article>
+<article>
+<code class="pod-code-inline">parse_str:(MinG::S13::Parser $: Str $inp, ParseWay $do = ParseWay::PARALLEL, *%_)</code>:
+Method that parses a single string based on the grammar that was initialised using Parser.init()
 </article>
 <article>
 <code class="pod-code-inline">setup:(MinG::S13::Parser $: MinG::Grammar $g, Str $inp, *%_)</code>:

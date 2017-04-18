@@ -91,6 +91,9 @@ grammar Do {
     token lex {\w+}
 }
 
+######################
+#        TEST        #
+######################
 sub MAIN() {
     parse_and_spit(grammar_from_text(Q:to<VERYEND>
         START=V
