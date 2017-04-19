@@ -27,13 +27,17 @@ my uint16 $run_number = 1 if $DEBUG;
 ############################
 # CONSTANTS OR NOT SO MUCH #
 ############################
+class Mover { ... };
 my $IS_SELECTOR = -> Node $x { $x.feat_node and $x.label.way == MERGE and $x.label.pol == PLUS };
 my $IS_FEAT_NODE = -> Node $x { $x.feat_node };
 my $IS_NOT_FEAT = -> Node $x { not ($x.feat_node) };
 
+my $IS_CORRECT_MOVER = -> Code $y { -> Mover $x { $x.children_with_property($y) } };
+my $LABEL_IS = -> $y { -> Node $x { $x.label eqv $y } };
+
 enum ParseWay < PROCEDURAL PARALLEL >;
 
-constant $BASE_E_CATS = 5;
+constant $BASE_E_CATS = 2;
 constant $MULTIP_E_CATS = 1;
 
 #################################################################################
@@ -123,6 +127,13 @@ sub bigger_pty (Priority $a, Priority $b) {
 class Mover {
     has Priority $.priority;
     has Node $.node;
+
+    #|{
+        Method that returns an array with all the children of the node that have a certain property.
+        }
+    method children_with_property(Code $p) {
+        return $.node.children_with_property($p);
+    }
 }
 
 #|{
@@ -132,6 +143,17 @@ class QueueItem {
     has Priority $.priority;
     has Mover @.movers;
     has Node $.node;
+
+    #|{
+        Method that returns an array with all the movers that have a certain property.
+        }
+    method movers_with_property(Code $p) of Array[Mover] {
+        my Mover @retv;
+        for @.movers -> $mover {
+            push @retv, $mover if $p($mover);
+        }
+        return @retv;
+    }
 
     #|{
         This method is a wrapper around Priority.bigger_than so that it can be called more easily from a Queue object.
@@ -212,10 +234,11 @@ class Queue {
         Method that deletes the highest-priority item and returns it. Linear time.
         }
     method pop() {
-        my Int $temp = self.ind_max;
-        if $temp {
-            push @!deletions, $temp;
-            return @.items[$temp]:delete;
+        my Int $place_to_delete = self.ind_max;
+        if $place_to_delete {
+            # It's only a deletion if we're not in the last place!
+            push @!deletions, $place_to_delete if ($place_to_delete < @.items.end);
+            return @.items[$place_to_delete]:delete;
         }
         @.items = [];
         return Nil;
@@ -334,7 +357,7 @@ class Derivation {
 
         my $nq = $.q.deep_clone;
         $nq.push($f_item); $nq.push($s_item);
-        my $struc = $.structure.item;
+        my $struc = $.structure;
         $struc.add_to_end(DerivTree.new(label => "merge1({$selector.str_label}, {$selected.str_label})",\
                                              children => ()));
 
@@ -358,7 +381,7 @@ class Derivation {
 
         debug("THIS SHOULD BE FALSE: {($nq eqv $.q).perl}");
 
-        my $struc = $.structure.clone;
+        my $struc = $.structure;
         $struc.add_to_end(DerivTree.new(label => "merge2({$selector.str_label}, {$selected.str_label})",\
                                              children => ()));
 
@@ -366,12 +389,19 @@ class Derivation {
     }
 
     #|{ See Stabler (2013)}
-    method merge3(QueueItem $pred) of Derivation {
+    method merge3(QueueItem $pred, Node @leaves, Node $mover_child, Node $selector, Priority $mover) of Derivation {
+        my $new_node = LexNode.new( label => $selector.label, children => @non_terms);
+        my $f_item = QueueItem.new( priority => $pred.priority,\
+                                    movers => (),\
+                                    node => $new_node);
 
+        my $s_item = QueueItem.new ( priority => $mover.priority,\
+                                     movers => $pred.movers.minus_this($mover),\
+                                     node => $mover_child);
     }
 
     #|{ See Stabler (2013)}
-    method merge4(QueueItem $pred) of Derivation {
+    method merge4(QueueItem $pred, Node @non_terms, Node $mover_child, Node $selector) of Derivation {
 
     }
 
@@ -388,11 +418,19 @@ class Derivation {
     #|{
         Method that gets the expansions to be had in the next step. Check the code's comments for more details.
         }
+    # This method is getting massive. Really, half the work of the parser is
+    # done here.
     method exps() of Array {
         my $this_prediction = $.q.pop();
         my @retv;
         return @retv unless $this_prediction;
+
         # Heuristic. We won't allow too many empty categories!
+        # This is a very important part of the algorithm. It is necessary if we
+        # are not going to implement the probability heuristic recommended by
+        # Stabler (2013). This seems to work pretty well. I haven't encountered
+        # any real restrictions imposed by this in examples I've tried out and
+        # it improves performance tremendously.
         return @retv if $.q.elems > ((@.input.elems + $BASE_E_CATS ) * $MULTIP_E_CATS);
 
         # SCAN CONSIDERED. NEEDS MERGE1-4 and MOVE1-2.
@@ -403,6 +441,10 @@ class Derivation {
             my $scanned = self.scan($this_prediction, $child_place);
             append @retv, $scanned if $scanned;
         }
+
+        # Note: with MERGE1, MERGE2, etc. we mean the rules as defined by
+        # Stabler. We distinguish that from our implementation of the rules
+        # which we will call Derivation.merge1, etc.
 
         # Let's consider MERGE1 and MERGE2 first.
         # This line can be a bit daunting, but it's not that hard actually.
@@ -431,6 +473,42 @@ SEL_LOOP:   for @selector_ch -> $selector {
                 if ($selected && $selector.children_with_property($IS_FEAT_NODE)) -> @non_terms {
                     my $merged = self.merge2($this_prediction, @non_terms, $selected, $selector);
                     append @retv, $merged if $merged;
+                }
+
+                # If we have the appropriate movers, do MERGE3 and/or MERGE4.
+                # The conditional line is convoluted. Pay special attention to
+                # the anonymous functions defined at the start of this file.
+                if ($this_prediction.movers_with_property($IS_CORRECT_MOVER($LABEL_IS($selected_f)))) -> @corr_movers {
+                    # We know there's one and only one child with the same feature
+                    # in its label so it's safe to take the first child with that
+                    # property.
+                    # Of course, this isn't getting us any "nice code" awards.
+                    for @corr_movers -> $corr_mover {
+                        my $corr_child = \
+                            $corr_mover.movers_with_property(\
+                                $IS_CORRECT_MOVER(\
+                                    $LABEL_IS($selected_f)))[0];
+
+                        # Checking for MERGE3.
+                        if $selector.children_with_property($IS_NOT_FEAT) -> @leaves {
+                            my $merged = self.merge3($this_prediction,\
+                                                     @leaves,\
+                                                     $corr_child,\
+                                                     $selector,\
+                                                     $corr_mover);
+                            append @retv, $merged if $merged;
+                        }
+
+                        # Checking for MERGE4.
+                        if $selector.children_with_property($IS_FEAT_NODE) -> @leaves {
+                            my $merged = self.merge4($this_prediction,\
+                                                     @leaves,\
+                                                     $corr_child,\
+                                                     $selector,\
+                                                     $corr_movery);
+                            append @retv, $merged if $merged;
+                        }
+                    }
                 }
             }
         }
