@@ -35,7 +35,7 @@ The best option may be to install Rakudo Star <http://rakudo.org/how-to-get-raku
 EXAMPLE USAGE
 =============
 
-As of now, someone who isn't interested in the inner workings of the module but wants to try out some (merge-only) minimalist grammars can easily create their grammar following this template:
+As of now, someone who isn't interested in the inner workings of the module but wants to try out some minimalist grammars can easily create their grammar following this template:
 
     START=F
     word1 :: =F =F -F F
@@ -46,9 +46,9 @@ As of now, someone who isn't interested in the inner workings of the module but 
     .
     word23 :: =F F ...
 
-Without the dots, and changing _wordi_ for your phonetic word (and, of course, changing F for whatever features you want your grammars to have).
+Without the dots, and changing _wordi_ for your phonetic word (and, of course, changing F for whatever features you want your grammars to have). For two example grammars, check the resources/ directory.
 
-You can save that as a file named, say, grammar.mg.
+You can save that as a file named grammar.mg.
 
 Then, a minimal script to use that grammar is:
 
@@ -61,7 +61,7 @@ Then, a minimal script to use that grammar is:
     my $p = MinG::S13::Parser.new();
     $p.init($g);
 
-    for lines() -> $line {
+    for lines() -> $*IN.$line {
         $p.parse_str($line);
     }
 
