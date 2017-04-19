@@ -36,6 +36,43 @@ The best option may be to install Rakudo Star <http://rakudo.org/how-to-get-raku
 
 The module is currently ready for distribution, so I might add it to the Perl6 environment so that you can install it with "zef install MinG".
 
+EXAMPLE USAGE
+=============
+
+As of now, someone who isn't interested in the inner workings of the module but wants to try out some (merge-only) minimalist grammars can easily create their grammar following this template:
+
+    START=F
+    word1 :: =F =F -F F
+    word2 :: =F F
+    :: =F =F F
+    .
+    .
+    .
+    word23 :: =F F ...
+
+Without the dots, and changing _wordi_ for your phonetic word (and, of course, changing F for whatever features you want your grammars to have).
+
+You can save that as a file named, say, grammar.mg.
+
+Then, a minimal script to use that grammar is:
+
+    use MinG;
+    use MinG::S13;
+    use MinG::S13::Logic; # May not be necessary. Add it just in case, for forward-compatibility.
+    use MinG::From::Text;
+
+    my $g = grammar_from_file("./grammar.mg");
+    my $p = MinG::S13::Parser.new();
+    $p.init($g);
+
+    for lines() -> $line {
+        $p.parse_str($line);
+    }
+
+You can copy-paste that, save it as parser.p6 (in the same directory as grammar.mg) and then simply run `perl6 parser.p6`. Each line you write of input will be parsed using your grammar. You can modify grammar.mg at any point and restart parser.p6 to have your new grammar working.
+
+When inputting lines, pay attention _not_ to put a final dot to your sentence. "dance." is a different word from "dance".
+
 CURRENTLY
 =========
 
