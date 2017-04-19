@@ -33,7 +33,7 @@
 <table id="TOC">
 <caption><h2 id="TOC_Title">Table of Contents</h2></caption>
 <tr class="toc-level-1"><td class="toc-number">1</td><td class="toc-text"><a href="#NAME">NAME</a></td></tr>
-  <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS]">INTERNAL CLASSES AND FUNCTIONS]</a></td></tr>
+  <tr class="toc-level-1"><td class="toc-number">2</td><td class="toc-text"><a href="#INTERNAL_CLASSES_AND_FUNCTIONS">INTERNAL CLASSES AND FUNCTIONS</a></td></tr>
             <tr class="toc-level-1"><td class="toc-number">3</td><td class="toc-text"><a href="#EXPORTED_CLASSES_AND_FUNCTIONS">EXPORTED CLASSES AND FUNCTIONS</a></td></tr>
            
 </table>
@@ -44,7 +44,7 @@
 ">
 <h1 id="NAME"><a class="u" href="#___top" title="go to top of document">NAME</a></h1>
 <p>MinG::S13 -- Stabler&#39;s (2013) parser.</p>
-<h1 id="INTERNAL_CLASSES_AND_FUNCTIONS]"><a class="u" href="#___top" title="go to top of document">INTERNAL CLASSES AND FUNCTIONS]</a></h1>
+<h1 id="INTERNAL_CLASSES_AND_FUNCTIONS"><a class="u" href="#___top" title="go to top of document">INTERNAL CLASSES AND FUNCTIONS</a></h1>
 <h1>Derivation: Class that represents one derivation.</h1><article>
 <code class="pod-code-inline">still_going:(Derivation $: *%_ --&gt; Bool)</code>:
 Method that returns whether this derivation still needs more steps.
@@ -70,11 +70,11 @@ See Stabler (2013)
 See Stabler (2013)
 </article>
 <article>
-<code class="pod-code-inline">move1:(Derivation $: QueueItem $pred, *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">move1:(Derivation $: QueueItem $pred, Node $licensor, Node $licensed, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
-<code class="pod-code-inline">move2:(Derivation $: QueueItem $pred, *%_ --&gt; Derivation)</code>:
+<code class="pod-code-inline">move2:(Derivation $: QueueItem $pred, Node $licensor, Node $mover, Node $mover_child, *%_ --&gt; Derivation)</code>:
 See Stabler (2013)
 </article>
 <article>
@@ -111,7 +111,7 @@ Method that runs the main parseing loop using procedural_run. Stops after it fin
 Method that initialises that parser to later parse several strings. Should be used instead of Parser.setup when a single grammar is going to be used several times.
 </article>
 <article>
-<code class="pod-code-inline">parse_str:(MinG::S13::Parser $: Str $inp, ParseWay $do = ParseWay::PARALLEL, *%_)</code>:
+<code class="pod-code-inline">parse_str:(MinG::S13::Parser $: Str $inp, ParseWay $do = ParseWay::PARALLEL, *%_ --&gt; Bool)</code>:
 Method that parses a single string based on the grammar that was initialised using Parser.init()
 </article>
 <article>

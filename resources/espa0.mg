@@ -19,5 +19,6 @@ de :: =D =Nf Nf
 de :: =D =Nm Nm
 :: =Nm N
 :: =Nf N
+comió :: =D V
 casa :: Nf
-fue :: =AD V
+fue :: =AD V 

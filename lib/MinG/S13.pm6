@@ -12,7 +12,7 @@ MinG::S13 -- Stabler's (2013) parser.
 #   INTERNAL THINGS     #   MAY CHANGE RAPIDLY  #
 #################################################
 =begin pod
-=head1 INTERNAL CLASSES AND FUNCTIONS]
+=head1 INTERNAL CLASSES AND FUNCTIONS
 =end pod
 
 #|{
@@ -126,13 +126,37 @@ class Derivation {
     }
 
     #|{ See Stabler (2013)}
-    method move1(QueueItem $pred) of Derivation {
+    method move1(QueueItem $pred, Node $licensor, Node $licensed) of Derivation {
+        my @new_movers = $pred.movers;
+        push @new_movers, Mover.new(priority => $pred.priority.add_p(0),\
+                                    node => $licensed);
+
+        my $new_item = QueueItem.new( priority => $pred.priority.add_p(1),\
+                                      movers => @new_movers,\
+                                      node => $licensor);
+        my $nq = $.q.deep_clone;
+        $nq.push($new_item);
+        my $struc = $.structure;
+
+        return Derivation.new(input => @.input, q => $nq, structure => $struc);
 
     }
 
     #|{ See Stabler (2013)}
-    method move2(QueueItem $pred) of Derivation {
+    method move2(QueueItem $pred, Node $licensor, Node $mover, Node $mover_child) of Derivation {
+        my @new_movers = $pred.movers_minus_this($mover);
+        push @new_movers, Mover.new(priority => $mover.priority,\
+                                    node => $mover_child);
 
+        my $new_item = QueueItem.new( priority => $pred.priority,\
+                                      movers => @new_movers,\
+                                      node => $licensor);
+
+        my $nq = $.q.deep_clone;
+        $nq.push($new_item);
+        my $struc = $.structure;
+
+        return Derivation.new(input => @.input, q => $nq, structure => $struc);
     }
 
     #|{
@@ -166,7 +190,7 @@ class Derivation {
         # Stabler. We distinguish that from our implementation of the rules
         # which we will call Derivation.merge1, etc.
 
-        # Let's consider MERGE1 and MERGE2 first.
+        # Here we consider MERGE1 to MERGE4
         # This line can be a bit daunting, but it's not that hard actually.
         # We grab this prediction's node and take the children of that node that
         # have the property of being a selector (i.e. FWAY::MERGE and FPol::PLUS).
@@ -179,18 +203,16 @@ class Derivation {
 SEL_LOOP:   for @selector_ch -> $selector {
                 # The following code checks that there is a node immediately below
                 # ROOT that has the proper category.
-                my Node $selected;
-                my $selected_f = MinG::Feature.new(way => MERGE, pol => MINUS, type => $selector.label.type);
-                my $selected_ind = $s13_global_lexical_tree.has_child($selected_f);
-                $selected = $s13_global_lexical_tree.children[$selected_ind] if $selected_ind;
+                my Node $selected = child_of_root(MERGE, MINUS, $selector.label.type);
+                next unless $selected;
 
                 # Get all leaves and do MERGE1
-                if ($selected && $selector.children_with_property($IS_NOT_FEAT)) -> @leaves {
+                if $selector.children_with_property($IS_NOT_FEAT) -> @leaves {
                     my $merged = self.merge1($this_prediction, @leaves, $selected, $selector);
                     append @retv, $merged if $merged;
                 }
                 # Get all non-leaves and do MERGE2
-                if ($selected && $selector.children_with_property($IS_FEAT_NODE)) -> @non_terms {
+                if $selector.children_with_property($IS_FEAT_NODE) -> @non_terms {
                     my $merged = self.merge2($this_prediction, @non_terms, $selected, $selector);
                     append @retv, $merged if $merged;
                 }
@@ -198,16 +220,17 @@ SEL_LOOP:   for @selector_ch -> $selector {
                 # If we have the appropriate movers, do MERGE3 and/or MERGE4.
                 # The conditional line is convoluted. Pay special attention to
                 # the anonymous functions defined at the start of this file.
-                if ($this_prediction.movers_with_property($IS_CORRECT_MOVER($LABEL_IS($selected_f)))) -> @corr_movers {
+                if ($this_prediction.movers_with_property(\
+                        $IS_CORRECT_MOVER(\
+                            $LABEL_IS($selected.label)))) -> @corr_movers {
                     # We know there's one and only one child with the same feature
                     # in its label so it's safe to take the first child with that
                     # property.
                     # Of course, this isn't getting us any "nice code" awards.
                     for @corr_movers -> $corr_mover {
                         my $corr_child = \
-                            $corr_mover.movers_with_property(\
-                                $IS_CORRECT_MOVER(\
-                                    $LABEL_IS($selected_f)))[0];
+                            $corr_mover.children_with_property(\
+                                $LABEL_IS($selected.label))[0];
 
                         # Checking for MERGE3.
                         if $selector.children_with_property($IS_NOT_FEAT) -> @leaves {
@@ -232,6 +255,41 @@ SEL_LOOP:   for @selector_ch -> $selector {
                 }
             }
         }
+
+        # Now it's the turn to consider MOVE1 and MOVE2
+        if $this_prediction.node.children_with_property($IS_LICENSOR) -> @licensor_ch {
+            for @licensor_ch -> $licensor {
+                my Node $licensed = child_of_root(MOVE, MINUS, $licensor.label.type);
+
+                # If licensed isn't Nil, then we should apply MOVE1.
+                if $licensed {
+                    my $moved = self.move1($this_prediction,\
+                                           $licensor,\
+                                           $licensed);
+                    append @retv, $moved if $moved;
+                }
+                # MOVE2 gets applied if we can find the appropriate movers.
+                if ($this_prediction.movers_with_property(\
+                        $IS_CORRECT_MOVER(\
+                            $LABEL_IS($licensed.label)))) -> @corr_movers {
+                    # Run move2 for each correct mover.
+                    for @corr_movers -> $corr_mover {
+                        my $corr_child = \
+                            $corr_mover.children_with_property(\
+                                $LABEL_IS($licensed.label))[0];
+
+                        my $moved = self.move2($this_prediction,\
+                                               $licensor,\
+                                               $corr_mover,\
+                                               $corr_child);
+                        append @retv, $moved if $moved;
+                    }
+
+                }
+            }
+        }
+
+        # Return an array with all the derivations that were added by MERGE1-4 and MOVE1-2.
         return @retv;
     }
 
@@ -386,7 +444,7 @@ class MinG::S13::Parser {
     #|{
         Method that parses a single string based on the grammar that was initialised using Parser.init()
         }
-    method parse_str(Str $inp, ParseWay $do = PARALLEL) {
+    method parse_str(Str $inp, ParseWay $do = PARALLEL) of Bool {
         @!results = ();
         my @proper_input = $inp.split(' ');
         my $que = Queue.new(items => (QueueItem.new(priority => Priority.new(pty => (0)),\
@@ -404,16 +462,20 @@ class MinG::S13::Parser {
         if $do == PROCEDURAL {
             if self.procedural_parse() {
                 say "\t{@.results[0].qtree}";
+                return True;
             } else {
                 say "\tThe string you passed is not in the language.";
+                return False;
             }
         } else {
             if self.parallel_parse() {
                 for @.results -> $res {
                     say "\t{$res.qtree}";
                 }
+                return True;
             } else {
                 say "\tThe string you passed is not in the language.";
+                return False;
             }
         }
     }

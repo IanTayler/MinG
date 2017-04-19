@@ -18,6 +18,7 @@ class Mover { ... };
 our $IS_SELECTOR = -> Node $x { $x.feat_node and $x.label.way == MERGE and $x.label.pol == PLUS };
 our $IS_FEAT_NODE = -> Node $x { $x.feat_node };
 our $IS_NOT_FEAT = -> Node $x { not ($x.feat_node) };
+our $IS_LICENSOR = -> Node $x { $x.feat_node and $x.label.way == MOVE and $x.label.pol == PLUS };
 
 our $IS_CORRECT_MOVER = -> Code $y { -> Mover $x { $x.children_with_property($y) } };
 our $LABEL_IS = -> $y { -> Node $x { $x.label eqv $y } };
@@ -108,6 +109,17 @@ sub bigger_pty (Priority $a, Priority $b) {
 }
 
 #|{
+    Function that returns a child of the lexical tree's ROOT with the correct properties.
+    }
+sub child_of_root(FWay $way, FPol $pol, $type) of Node is export {
+    my $ret_f = MinG::Feature.new(way => $way, pol => $pol, type => $type);
+    my $ret_ind = $s13_global_lexical_tree.has_child($ret_f);
+    return $s13_global_lexical_tree.children[$ret_ind] if $ret_ind;
+
+    return Nil; # Otherwise.
+}
+
+#|{
     Class for our movers: they represent the nodes we selected when we ran into a [MOVE, PLUS] feature and encountered a [MOVE, MINUS] feature as one of ROOT's children.
     }
 class Mover {
@@ -120,6 +132,10 @@ class Mover {
     method children_with_property(Code $p) {
         return $.node.children_with_property($p);
     }
+
+    method to_str() {
+        return "P: {$.priority.pty.join()}. N: {$.node.qtree}";
+    }
 }
 
 #|{
@@ -130,6 +146,16 @@ class QueueItem {
     has Mover @.movers;
     has Node $.node;
 
+    #|{
+        Method that gets the higher priority taking into consideration the queue's priority and all the movers' priorities.
+        }
+    method highest_priority() of Priority {
+        my $best_priority = self.priority;
+        for @.movers -> $mover {
+            $best_priority = $mover.priority if $mover.priority.bigger_than($best_priority);
+        }
+        return $best_priority;
+    }
     #|{
         Method that returns the list of movers without a certain indicated one.
 
@@ -157,7 +183,7 @@ class QueueItem {
     method bigger_than(QueueItem $other) {
         return False unless self;
         return True unless $other;
-        return self.priority.bigger_than($other.priority);
+        return self.highest_priority.bigger_than($other.highest_priority);
     }
 
     #|{
@@ -166,7 +192,10 @@ class QueueItem {
     method to_str() of Str {
         my @pretv = "\tQueueItem:";
         push @pretv, "\t\tPriority:\n\t\t{$.priority.pty.join()}";
-        push @pretv, "\t\tMovers:\n\t\t{@.movers}"; # Let's improve this later.
+        push @pretv, "\t\tMovers:";
+        for @.movers -> $mover {
+            push @pretv, "\n\t\t{$mover.to_str}";
+        }
         push @pretv, "\t\tNode:\n\t\t{$.node.qtree}";
         return @pretv.join("\n");
     }

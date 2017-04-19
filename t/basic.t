@@ -4,8 +4,9 @@ use lib 'lib';
 use MinG;
 use MinG::S13;
 use MinG::S13::Logic;
+use MinG::From::Text;
 
-plan 6;
+plan 8;
 
 sub fs(Str $s) {
     return feature_from_str($s);
@@ -57,5 +58,17 @@ $g = MinG::Grammar.new(lex => ($fit, $sit, $tit));
 $q = $g.litem_tree.qtree();
 say $q;
 ok "[.ROOT  [.=A abc ] [.C [.=B [.+A gogo ] ] ] [.-C [.=B [.+A gogo ] ] ] ] " eq $q;
+
+###########################
+# SEVENTH AND EIGTH TESTS #
+###########################
+my $espg = grammar_from_file($ESPA0);
+my $engg = grammar_from_file($ENG0);
+
+my $parser = MinG::S13::Parser.new();
+$parser.init($espg);
+ok $parser.parse_str("maría dijo que pedro pensaba que era viejo");
+$parser.init($engg);
+ok $parser.parse_str("which wine the queen prefers");
 
 done-testing;

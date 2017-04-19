@@ -49,11 +49,19 @@ Returns the length of the priority. In this implementation, priorities are seque
 <code class="pod-code-inline">bigger_pty:(Priority $a, Priority $b)</code>:
 Function used to compare two priorities. Uses Priority.bigger_than method internally. There aren&#39;t many reasons to use it, but if you can find one, go ahead.
 </article>
+<article>
+<code class="pod-code-inline">child_of_root:(FWay $way, FPol $pol, $type --&gt; Node)</code>:
+Function that returns a child of the lexical tree&#39;s ROOT with the correct properties.
+</article>
 <h1>Mover: Class for our movers: they represent the nodes we selected when we ran into a [MOVE, PLUS] feature and encountered a [MOVE, MINUS] feature as one of ROOT&#39;s children.</h1><article>
 <code class="pod-code-inline">children_with_property:(Mover $: Code $p, *%_)</code>:
 Method that returns an array with all the children of the node that have a certain property.
 </article>
 <h1>QueueItem: Objets of this class are items in a Queue. The only Queue we need to implement is the one for category predictions, so this is to be interpreted as an item in THAT queue.</h1><article>
+<code class="pod-code-inline">highest_priority:(QueueItem $: *%_ --&gt; Priority)</code>:
+Method that gets the higher priority taking into consideration the queue&#39;s priority and all the movers&#39; priorities.
+</article>
+<article>
 <code class="pod-code-inline">movers_minus_this:(QueueItem $: Mover $one, *%_ --&gt; Array[Mover])</code>:
 Method that returns the list of movers without a certain indicated one. We take linear time here to avoid having to deal with empty movers in this array. If performance starts being an issue this may be a place to look. (Although, to be fair, the array of movers is usually very short due to the SMC, so linear time there isn&#39;t much of a problem.)
 </article>

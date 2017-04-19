@@ -71,6 +71,8 @@ Then, a minimal script to use that grammar is:
 
 You can copy-paste that, save it as parser.p6 (in the same directory as grammar.mg) and then simply run `perl6 parser.p6`. Each line you write of input will be parsed using your grammar. You can modify grammar.mg at any point and restart parser.p6 to have your new grammar working.
 
+If you want to try out existing grammars, you can use one of two default grammars that can be accessed by passing the variables $ESPA0 (for "español") or $ENG0 (for "english") to the subroutine grammar_from_file() (instead of passing "./grammar.mg"). You can check the grammars out at resources/ in this repository.
+
 When inputting lines, pay attention _not_ to put a final dot to your sentence. "dance." is a different word from "dance".
 
 CURRENTLY
@@ -84,14 +86,12 @@ CURRENTLY
 
   * Automatically generates LaTeX/qtree code for trees. (Node.qtree inside MinG)
 
-  * Has a merge-only working parser for MGs! (MinG::S13::Parser or MinG::S13.parse_and_spit())
+  * Has a working parser for MGs! (MinG::S13::Parser or MinG::S13.parse_and_spit())
 
   * Has a parser that reads grammars from a file! (MinG::From::Text)
 
 TODO
 ====
-
-  * Finish the parser so that it includes move-cases. (Will bump to 1.0.0)
 
   * Allow some useful expansions of MGs.
 
