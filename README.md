@@ -21,20 +21,16 @@ INSTALLATION
 
 If you have perl6 and panda or zef, the following should suffice:
 
-        git clone https://github.com/IanTayler/MinG.git
-        cd MinG
-        zef install .
+        zef install MinG
 
 If you don't, the easiest is probably to install rakudobrew <https://github.com/tadzik/rakudobrew> and then run:
 
         rakudobrew build moar --gen-moar --gen-nqp --backend=moar
         rakudobrew build zef
 
-and you should be ready to clone and install this repository.
+and you should be ready to install this module with zef.
 
 The best option may be to install Rakudo Star <http://rakudo.org/how-to-get-rakudo/> which comes with zef and some common modules. There's lots of tutorials about how to get perl6. Follow one of them and make sure you install zef (or panda).
-
-The module is currently ready for distribution, so I might add it to the Perl6 environment so that you can install it with "zef install MinG".
 
 EXAMPLE USAGE
 =============
