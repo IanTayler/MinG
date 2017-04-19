@@ -63,7 +63,7 @@ Then, a minimal script to use that grammar is:
     my $p = MinG::S13::Parser.new();
     $p.init($g);
 
-    for lines() -> $*IN.$line {
+    for $*IN.lines() -> $line {
         $p.parse_str($line);
     }
 

@@ -62,7 +62,7 @@ my $g = grammar_from_file("./grammar.mg");
 my $p = MinG::S13::Parser.new();
 $p.init($g);
 
-for lines() -> $*IN.$line {
+for $*IN.lines() -> $line {
     $p.parse_str($line);
 }
 =end code
