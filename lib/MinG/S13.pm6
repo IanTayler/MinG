@@ -145,6 +145,16 @@ class QueueItem {
     has Node $.node;
 
     #|{
+        Method that returns the list of movers without a certain indicated one.
+
+        We take linear time here to avoid having to deal with empty movers in this array. If performance starts being an issue this may be a place to look. (Although, to be fair, the array of movers is usually very short due to the SMC, so linear time there isn't much of a problem.)
+        }
+    method movers_minus_this(Mover $one) of Array[Mover] {
+        # Aha! You didn't expect me to keep using lambdas/pointy blocks like this!
+        return self.movers_with_property(-> Mover $x { not($x eqv $one)});
+    }
+
+    #|{
         Method that returns an array with all the movers that have a certain property.
         }
     method movers_with_property(Code $p) of Array[Mover] {
@@ -223,7 +233,7 @@ class Queue {
     #|{
         Method that gets a reference to the highest-priority item. Linear time.
         }
-    method max() {
+    method max() of QueueItem {
         my Int $temp = self.ind_max;
         return @.items[$temp] if $temp;
         return Nil; # This is like dropping a derivational time-bomb.
@@ -233,7 +243,7 @@ class Queue {
     #|{
         Method that deletes the highest-priority item and returns it. Linear time.
         }
-    method pop() {
+    method pop() of QueueItem {
         my Int $place_to_delete = self.ind_max;
         if $place_to_delete {
             # It's only a deletion if we're not in the last place!
@@ -358,8 +368,6 @@ class Derivation {
         my $nq = $.q.deep_clone;
         $nq.push($f_item); $nq.push($s_item);
         my $struc = $.structure;
-        $struc.add_to_end(DerivTree.new(label => "merge1({$selector.str_label}, {$selected.str_label})",\
-                                             children => ()));
 
         return Derivation.new(input => @.input, q => $nq, structure => $struc);
     }
@@ -382,27 +390,42 @@ class Derivation {
         debug("THIS SHOULD BE FALSE: {($nq eqv $.q).perl}");
 
         my $struc = $.structure;
-        $struc.add_to_end(DerivTree.new(label => "merge2({$selector.str_label}, {$selected.str_label})",\
-                                             children => ()));
 
         return Derivation.new(input => @.input, q => $nq, structure => $struc);
     }
 
     #|{ See Stabler (2013)}
-    method merge3(QueueItem $pred, Node @leaves, Node $mover_child, Node $selector, Priority $mover) of Derivation {
-        my $new_node = LexNode.new( label => $selector.label, children => @non_terms);
+    method merge3(QueueItem $pred, Node @leaves, Node $mover_child, Node $selector, Mover $mover) of Derivation {
+        my $new_node = LexNode.new( label => $selector.label, children => @leaves);
         my $f_item = QueueItem.new( priority => $pred.priority,\
                                     movers => (),\
                                     node => $new_node);
 
-        my $s_item = QueueItem.new ( priority => $mover.priority,\
-                                     movers => $pred.movers.minus_this($mover),\
+        my $s_item = QueueItem.new( priority => $mover.priority,\
+                                     movers => $pred.movers_minus_this($mover),\
                                      node => $mover_child);
+        my $nq = $.q.deep_clone;
+        $nq.push($f_item); $nq.push($s_item);
+        my $struc = $.structure;
+
+        return Derivation.new(input => @.input, q => $nq, structure => $struc);
     }
 
     #|{ See Stabler (2013)}
-    method merge4(QueueItem $pred, Node @non_terms, Node $mover_child, Node $selector) of Derivation {
+    method merge4(QueueItem $pred, Node @non_terms, Node $mover_child, Node $selector, Mover $mover) of Derivation {
+        my $new_node = LexNode.new( label => $selector.label, children => @non_terms);
+        my $f_item = QueueItem.new( priority => $pred.priority,\
+                                    movers => $pred.movers_minus_this($mover),\
+                                    node => $new_node);
 
+        my $s_item = QueueItem.new( priority => $mover.priority,\
+                                     movers => (),\
+                                     node => $mover_child);
+        my $nq = $.q.deep_clone;
+        $nq.push($f_item); $nq.push($s_item);
+        my $struc = $.structure;
+
+        return Derivation.new(input => @.input, q => $nq, structure => $struc);
     }
 
     #|{ See Stabler (2013)}
@@ -505,7 +528,7 @@ SEL_LOOP:   for @selector_ch -> $selector {
                                                      @leaves,\
                                                      $corr_child,\
                                                      $selector,\
-                                                     $corr_movery);
+                                                     $corr_mover);
                             append @retv, $merged if $merged;
                         }
                     }
