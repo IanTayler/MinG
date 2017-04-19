@@ -2,6 +2,7 @@
 use lib 'lib';
 use MinG;
 use MinG::S13;
+use MinG::S13::Logic;
 use Test;
 use Test::META;
 
@@ -14,7 +15,7 @@ my $p2 = Priority.new(pty => (1, 0, 0));
 my $p3 = Priority.new(pty => (0, 1, 0));
 my $p4 = Priority.new(pty => (1, 1));
 
-ok ($p4.bigger_than($p1)) && ($p1.bigger_than($p3)) && ($p3.bigger_than($p2));
+ok ($p1.bigger_than($p3)) && ($p3.bigger_than($p2)) && ($p2.bigger_than($p4));
 
 my $deriv = Derivation.new(input => ("sanga", "changa", "wanga"));
 say $deriv.input;
@@ -39,8 +40,6 @@ my $pan = MinG::LItem.new( features => ($d), phon => "pan");
 my $manteca = MinG::LItem.new( features => ($d), phon => "manteca");
 
 my $g = MinG::Grammar.new(lex => ($juan, $come, $escupe, $pan, $manteca, $force), start_cat => $c);
-
-$g.litem_tree.compile_tex('notcool.tex');
 
 parse_and_spit($g, "juan escupe pan");
 

@@ -1,6 +1,7 @@
 use strict;
 use MinG;
 use MinG::S13;
+use MinG::S13::Logic;
 
 #|{
     Grammar class that parses a file describing an MG lexicon.

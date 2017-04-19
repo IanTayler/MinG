@@ -3,6 +3,7 @@ use lib 'lib';
 
 use MinG;
 use MinG::S13;
+use MinG::S13::Logic;
 
 plan 6;
 
