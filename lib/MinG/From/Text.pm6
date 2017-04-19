@@ -84,7 +84,7 @@ sub grammar_from_text(Str $s) of MinG::Grammar is export {
 }
 
 sub grammar_from_file($f) of MinG::Grammar is export {
-    my $contents = slurp $f;
+    my $contents = $f.slurp;
     # say MinG::From::Text::Grammar.parse($contents);
     return grammar_from_text($contents);
 }
