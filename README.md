@@ -3,6 +3,8 @@ MinG
 
 A small module for working with Stabler's Minimalist Grammars in Perl6.
 
+[![Build Status](https://travis-ci.org/IanTayler/MinG.svg?branch=master)](https://travis-ci.org/IanTayler/MinG)
+
 STRUCTURE
 =========
 
