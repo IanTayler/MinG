@@ -1,1 +1,0 @@
-bin/ming-analyser.p6

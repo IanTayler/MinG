@@ -28,7 +28,7 @@ sub MAIN(:$FILE, Bool :$eng0, Bool :$espa0) {
         my @sentences = $line.split(';');
         for @sentences -> $sentence {
             say $sentence.lc if @sentences.elems > 1;
-            $p.parse_str($sentence.trim);
+            $p.large_parse($sentence.trim);
         }
         print "ENTRY>> ";
     }
