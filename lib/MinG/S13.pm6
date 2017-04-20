@@ -600,16 +600,6 @@ sub MAIN() {
 
     my $parser = MinG::S13::Parser.new();
 
-    my @things = ["", "a", "b", "b a", "a b a", "abab"];
-
-    # for @things -> $thing {
-    #     say "\n\tPROCEDURAL: ";
-    #     $parser.parse_me($g, $thing, PROCEDURAL);
-    #
-    #     say "\n\tPARALLEL: ";
-    #     $parser.parse_me($g, $thing, PARALLEL);
-    # }
-
     my $c = feature_from_str("C"); my $selv = feature_from_str("=V"); my $v = feature_from_str("V"); my $d = feature_from_str("D"); my $seld = feature_from_str("=D");
 
     my $force = MinG::LItem.new( features => ($selv, $c), phon => "");
@@ -638,7 +628,7 @@ sub MAIN() {
         #$parser.parse_me($g, $frase, PROCEDURAL);
 
         say "\n\tPARALLEL: ";
-        $parser.parse_str($frase);
+        $parser.large_parse($frase);
     }
 
 }

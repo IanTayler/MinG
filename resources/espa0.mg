@@ -1,9 +1,9 @@
 START=I
-:: =V +t DEC
-:: =V =D PREG
-:: =PREG +t +q I
-:: =DEC I 
-:: =DEC =D I 
+[declarativa] :: =V +t DEC
+[pregunta] :: =V =D PREG
+[pregunta]:: =PREG +t +q I
+[declarativa]:: =DEC I 
+[declarativa]:: =DEC =D I 
 juan :: Dm
 pedro :: Dm
 saludó :: =DA V 
@@ -26,10 +26,15 @@ alta :: Af
 viejo :: Am
 vieja :: Af
 pensaba :: =S V -t
+piensa :: =S V -t
 el :: =Nm Dm
 el :: =Am Dm
 la :: =Nf Df
 la :: =Af Df
+una :: =Nf Df
+una :: =Af Df
+amiga :: Nf
+amigo :: Nm
 bruta :: Af
 sordo :: Am
 sorda :: Af
@@ -38,10 +43,24 @@ de :: =D =Nf Nf
 de :: =D =Nm Nm
 del :: =Nm =Nm Nm
 del :: =Nm =Nf Nf
-:: =Nm N
-:: =Nf N
-:: =Dm D
-:: =Df D
+[sacagénero] :: =Nm N
+[sacagénero] :: =Nf N
+[sacagénero] :: =Dm D
+[sacagénero] :: =Df D
+[adjuntadorf] :: =Af =Nf Nf
+[adjuntadorm] :: =Am =Nm Nm
+[adjuntadorn] :: =CONN =Nf Nf
+[adjuntadorn] :: =CONN =Nm Nm
+[adjuntadoro] :: =I =ADVO I
+ayer :: ADVO
+antes :: ADVO
+pizza :: Nf
+muzzarella :: Nf
+con :: =N CONN
+mejor :: =Nf Nf
+mejor :: =Nm Nm
+peor :: =Nf Nf
+peor :: =Nm Nm
 comió :: =D V -t
 casa :: Nf
 fue :: =DA V -t
