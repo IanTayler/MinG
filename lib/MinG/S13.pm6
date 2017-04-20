@@ -446,7 +446,7 @@ class MinG::S13::Parser {
         }
     method parse_str(Str $inp, ParseWay $do = PARALLEL) of Bool {
         @!results = ();
-        my @proper_input = $inp.split(' ');
+        my @proper_input = $inp.lc.split(' ');
         my $que = Queue.new(items => (QueueItem.new(priority => Priority.new(pty => (0)),\
                                                     movers => (),\
                                                     node => $.start_cat,\
