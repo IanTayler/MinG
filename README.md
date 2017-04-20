@@ -52,14 +52,14 @@ Without the dots, and changing _wordi_ for your phonetic word (and, of course, c
 
 You can save that in a file and call it using `analyser.p6` (you can use `analyser.p6-j` to run it on the jvm if you have the jvm backend installed and you so wish). Assuming the file is in the directory `$HOME/grammars/` and it's called gr0.mg, you can run:
 
-    analyser.p6 $HOME/grammars/gr0.mg
+    ming-analyser.p6 $HOME/grammars/gr0.mg
 
 Each line you write of input will be parsed using your grammar. You can parse several sentences in a series by separating them with a ';'. You can modify gr0.mg at any point and restart analyser.p6 to have your new grammar working.
 
 If you want to try out the example grammars, they can be accessed by passing the arguments `--eng0` for a very small grammar of something-like-English, copied from Stabler (2013) and `--espa0` for a not-so-small (but small) grammar of Spanish written by myself. Like so:
 
-    analyser.p6 --eng0
-    analyser.p6 --espa0
+    ming-analyser.p6 --eng0
+    ming-analyser.p6 --espa0
 
 When inputting lines, pay attention _not_ to put a final dot to your sentence. "dance." is a different word from "dance".
 
@@ -77,6 +77,8 @@ CURRENTLY
   * Has a working parser for MGs! (MinG::S13::Parser or MinG::S13.parse_and_spit())
 
   * Has a parser that reads grammars from a file! (MinG::From::Text)
+
+  * Has an analyser script (ming-analyser.p6) that can be used to read grammars from files and analyse sentences from standard input.
 
 TODO
 ====
