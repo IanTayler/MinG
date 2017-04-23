@@ -71,7 +71,11 @@ class Node {
             }
             $retv ~= "] ";
         } else {
-            $retv = self.str_label;
+            if self.str_label !eq " " {
+                $retv = self.str_label;
+            } else {
+                $retv = "[ ] "
+            }
         }
         return $retv;
     }
