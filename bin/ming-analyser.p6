@@ -3,7 +3,7 @@ use MinG::S13;
 use MinG::S13::Logic; # May not be necessary. Add it just in case, for forward-compatibility.
 use MinG::From::Text;
 
-sub MAIN(:$FILE, Bool :$eng0, Bool :$espa0) {
+sub MAIN(:$FILE, Bool :$eng0, Bool :$espa0, Str :$compile) {
     my MinG::Grammar $g;
     if $espa0 {
         $g = grammar_from_file($ESPA0);
@@ -28,7 +28,7 @@ sub MAIN(:$FILE, Bool :$eng0, Bool :$espa0) {
         my @sentences = $line.split(';');
         for @sentences -> $sentence {
             say $sentence.lc if @sentences.elems > 1;
-            $p.large_parse($sentence.trim);
+            $p.large_parse($sentence.trim, PARALLEL, $compile);
         }
         print "ENTRY>> ";
     }

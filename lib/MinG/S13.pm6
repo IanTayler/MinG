@@ -470,7 +470,7 @@ class MinG::S13::Parser {
     #|{
         Method that parses a single string based on the grammar that was initialised using Parser.init()
         }
-    method parse_str(Str $inp, ParseWay $do = PARALLEL) of Bool {
+    method parse_str(Str $inp, ParseWay $do = PARALLEL, Str $compile = "") of Bool {
         @!results = ();
         my @proper_input = $inp.lc.split(' ');
         my $que = Queue.new(items => (QueueItem.new(priority => Priority.new(pty => (0)),\
@@ -494,8 +494,12 @@ class MinG::S13::Parser {
             }
         } else {
             if self.parallel_parse() {
-                for @.results -> $res {
-                    say "\t{$res.qtree}";
+                if $compile {
+                    Node.multicompile_tex(@.results, $compile);
+                } else {
+                    for @.results -> $res {
+                        say "\t{$res.qtree}";
+                    }
                 }
                 return True;
             } else {
@@ -508,7 +512,7 @@ class MinG::S13::Parser {
     #|{
         Method that deletes all non-phonetically-empty words that don't appear in the input before parsing. When using large grammars, this can be much more efficient, but has a large constant time-cost, so it will make small grammars slower.
         }
-    method large_parse(Str $inp, ParseWay $do = PARALLEL) of Bool {
+    method large_parse(Str $inp, ParseWay $do = PARALLEL, Str $compile = "") of Bool {
         my @words = $inp.lc.split(' ');
         my @necessary_items;
         for $!full_grammar.lex -> $lex_item {
@@ -527,7 +531,7 @@ class MinG::S13::Parser {
         die "bad start symbol for the grammar!" without $start_ind;
         $!start_cat = $s13_global_lexical_tree.children[$start_ind];
 
-        my Bool $retv = self.parse_str($inp, $do);
+        my Bool $retv = self.parse_str($inp, $do, $compile);
         self.re_init();
         return $retv;
     }
