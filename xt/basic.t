@@ -7,7 +7,7 @@ use MinG::From::Text;
 use Test;
 use Test::META;
 
-plan 6;
+plan 8;
 
 meta-ok();
 
@@ -78,5 +78,20 @@ ok $all-fine;
 use MinG::EDMG;
 my $edmg_f = MinG::EDMG::Feature.new(way => MERGE, pol => PLUS, is_adj => True);
 nok $edmg_f.is_covert_mov;
+
+###########################
+# SEVENTH AND EIGTH TESTS #
+###########################
+
+ok MinG::EDMG::Feature.from_str("A<") eqv MinG::EDMG::Feature.new(way => MERGE,\
+                                                      pol => PLUS,\
+                                                      type => "A",\
+                                                      side => MinG::EDMG::FSide::RIGHT,\
+                                                      is_head_mov => True,\
+                                                      head_mov_side => MinG::EDMG::FSide::LEFT);
+
+ok MinG::EDMG::Feature.from_str("DELTA") eqv MinG::EDMG::Feature.new(way => MERGE,\
+                                                         pol => MINUS,\
+                                                         type => "DELTA");
 
 done-testing;
