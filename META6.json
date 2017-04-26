@@ -15,5 +15,6 @@
     },
     "depends" : [ ],
     "resources" : ["template.tex", "espa0.mg", "eng0.mg"],
-    "source-url" : "https://github.com/IanTayler/MinG.git"
+    "source-url" : "https://github.com/IanTayler/MinG.git",
+    "license" : "Artistic-2.0"
 }
