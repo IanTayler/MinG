@@ -121,15 +121,15 @@ sub edmg_grammar_from_text(Str $s) of MinG::EDMG::Grammar is export {
 
 sub grammar_from_file($f) of MinG::Grammar is export {
     my $contents = $f.slurp;
-    my $lines = $contents.split(/\n/);
+    my @lines = $contents.split(/\n/);
 
     my regex type {'MG'|'EDMG'};
     my $type = "MG";
-    if $lines[0] ~~ /^'TYPE='<type>/ {
+    if @lines[0] ~~ /^'TYPE='<type>/ {
         $type = $/<type>.Str;
-        $lines = $lines[1..*];
+        @lines = @lines[1..*];
     }
-    $contents = $lines.join("\n");
+    $contents = @lines.join("\n");
     if $type eq "MG" {
         return mg_grammar_from_text($contents);
     } elsif $type eq "EDMG" {
