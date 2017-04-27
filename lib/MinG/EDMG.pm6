@@ -1,10 +1,25 @@
 use strict;
 use MinG;
 use MinG::S13;
+use MinG::S13::Logic;
 
 unit module MinG::EDMG;
 
+#################################################
+#   INTERNAL THINGS     #   MAY CHANGE RAPIDLY  #
+#################################################
+=begin pod
+=head1 INTERNAL CLASSES AND FUNCTIONS
+=end pod
+
 enum FSide <LEFT RIGHT>;
+
+#|{
+    Subroutine that returns 0 if it gets 1, and 1 otherwise.
+    }
+sub other_p(Int $i) of Int {
+    return (($i == 1) ?? 0 !! 1);
+}
 
 #####################################################
 #   EXTERNAL THINGS     #   SHOULD STAY CONSTANT    #
@@ -103,3 +118,17 @@ class LItem is MinG::LItem { }; # As of now, I don't see any needed additions.
     Class that defines an EDMG grammar.
     }
 class Grammar is MinG::Grammar { }; # No additions needed for now.
+
+#|{
+    Class that implements a Derivation for our EDMG parser.
+    }
+class Derivation is MinG::S13::Derivation {
+
+}
+
+#|{
+    Class that runs a Stabler (2013)-type parser for EDMGs.
+    }
+class Parser is MinG::S13::Parser {
+
+}

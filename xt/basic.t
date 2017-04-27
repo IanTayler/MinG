@@ -18,7 +18,7 @@ my $p4 = Priority.new(pty => (1, 1));
 
 ok ($p1.bigger_than($p3)) && ($p3.bigger_than($p2)) && ($p2.bigger_than($p4));
 
-my $deriv = Derivation.new(input => ("sanga", "changa", "wanga"));
+my $deriv = MinG::S13::Derivation.new(input => ("sanga", "changa", "wanga"));
 say $deriv.input;
 ok $deriv.input.elems == 3;
 ok $deriv.still_going;
