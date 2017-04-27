@@ -7,7 +7,7 @@ use MinG::From::Text;
 use Test;
 use Test::META;
 
-plan 8;
+plan 9;
 
 meta-ok();
 
@@ -93,5 +93,23 @@ ok MinG::EDMG::Feature.from_str("A<") eqv MinG::EDMG::Feature.new(way => MERGE,\
 ok MinG::EDMG::Feature.from_str("DELTA") eqv MinG::EDMG::Feature.new(way => MERGE,\
                                                          pol => MINUS,\
                                                          type => "DELTA");
+
+#########################
+#       NINTH TEST      #
+#########################
+my $e-d = MinG::EDMG::Feature.from_str("D");
+my $e-seldl = MinG::EDMG::Feature.from_str("=D");
+my $e-v = MinG::EDMG::Feature.from_str("V");
+
+my $e-juan = MinG::EDMG::LItem.new(features => ($e-d), phon => "juan");
+my $e-pan = MinG::EDMG::LItem.new(features => ($e-d), phon => "pan");
+my $e-come = MinG::EDMG::LItem.new(features => ($e-seldl, $e-seldl, $e-v), phon => "come");
+
+my $e-g = MinG::EDMG::Grammar.new(lex => ($e-juan, $e-pan, $e-come), start_cat => $e-v);
+
+my $e-parser = MinG::EDMG::Parser.new();
+$e-parser.init($e-g);
+
+ok $e-parser.large_parse("juan pan come");
 
 done-testing;
